@@ -1,0 +1,45 @@
+<Window x:Class="Anything.UI.Wpf.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About Anything"
+        Height="300"
+        Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource WindowBackground}">
+
+    <Grid Margin="20">
+        <StackPanel>
+
+            <TextBlock Text="Anything"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TextBrush}"
+                       Margin="0 0 0 10"/>
+
+            <TextBlock Text="Created by:"
+                       Foreground="{DynamicResource TextBrush}"/>
+
+            <TextBlock Text="• vesno4null" Foreground="{DynamicResource TextBrush}"/>
+            <TextBlock Text="• RandomSoftMakers" Foreground="{DynamicResource TextBrush}"/>
+            <TextBlock Text="• GitHub Contributors" Foreground="{DynamicResource TextBrush}" Margin="0 0 0 20"/>
+
+            <TextBlock Text="Theme:"
+                       Foreground="{DynamicResource TextBrush}"
+                       Margin="0 0 0 5"/>
+
+            <ComboBox x:Name="ThemeSelector"
+                      Width="150"
+                      SelectionChanged="ThemeSelector_Changed">
+                <ComboBoxItem Content="Dark" IsSelected="True"/>
+                <ComboBoxItem Content="Light"/>
+            </ComboBox>
+
+            <Button Content="OK"
+                    Width="80"
+                    HorizontalAlignment="Right"
+                    Margin="0 20 0 0"
+                    Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

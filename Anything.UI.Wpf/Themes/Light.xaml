@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="WindowBackgroundColor">#F3F3F3</Color>
+    <Color x:Key="TextColor">#000000</Color>
+    <Color x:Key="SearchBoxBackground">#FFFFFFFF</Color>
+    <Color x:Key="SearchBoxBorder">#33000000</Color>
+
+    <SolidColorBrush x:Key="WindowBackground" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+    <SolidColorBrush x:Key="SearchBoxBackgroundBrush" Color="{StaticResource SearchBoxBackground}"/>
+    <SolidColorBrush x:Key="SearchBoxBorderBrush" Color="{StaticResource SearchBoxBorder}"/>
+
+    <Style TargetType="Control">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <Style TargetType="ListView">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <Style TargetType="GridViewColumnHeader">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="#DDDDDD"/>
+    </Style>
+</ResourceDictionary>
