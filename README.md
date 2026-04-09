@@ -21,9 +21,8 @@
 ---
 
 ## 📸 Скриншоты
-
-*(добавь позже, если захочешь)*
-
+![alt text](https://github.com/RandomSoftMakers/Anything/blob/main/ScreenShot_Dark)
+![alt text](https://github.com/RandomSoftMakers/Anything/blob/main/Screenshot_Light)
 ---
 
 ## 🛠 Технологии
