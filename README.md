@@ -44,5 +44,5 @@
 
 ```bash
 git clone https://github.com/RandomSoftMakers/anything.git
-cd anything/src/Anything.UI.Wpf
-dotnet build
+cd anything
+dotnet build anything.sln
