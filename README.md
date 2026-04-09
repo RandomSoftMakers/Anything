@@ -1,5 +1,5 @@
 # Anything
-Молниеносный локальный поиск по файлам для Windows.  
+Молниеносный локальный поиск по файлам для Windows, Linux и Mac OS.  
 Минималистичный интерфейс, мгновенная выдача, открытый исходный код.
 
 ![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
