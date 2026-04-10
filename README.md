@@ -1,3 +1,4 @@
+![alt text](https://github.com/RandomSoftMakers/Anything/blob/main/icon.png) 
 # Anything
 Молниеносный локальный поиск по файлам для Windows, Linux и Mac OS.  
 Минималистичный интерфейс, мгновенная выдача, открытый исходный код.
