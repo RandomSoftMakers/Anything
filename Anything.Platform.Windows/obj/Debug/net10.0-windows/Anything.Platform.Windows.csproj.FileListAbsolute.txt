@@ -1,0 +1,16 @@
+/home/vesno/Anything/Anything.Platform.Windows/bin/Debug/net10.0-windows/Anything.Platform.Windows.deps.json
+/home/vesno/Anything/Anything.Platform.Windows/bin/Debug/net10.0-windows/Anything.Platform.Windows.dll
+/home/vesno/Anything/Anything.Platform.Windows/bin/Debug/net10.0-windows/Anything.Platform.Windows.pdb
+/home/vesno/Anything/Anything.Platform.Windows/bin/Debug/net10.0-windows/Anything.Core.dll
+/home/vesno/Anything/Anything.Platform.Windows/bin/Debug/net10.0-windows/Anything.Core.pdb
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.csproj.AssemblyReference.cache
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.GeneratedMSBuildEditorConfig.editorconfig
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.AssemblyInfoInputs.cache
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.AssemblyInfo.cs
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.csproj.CoreCompileInputs.cache
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.sourcelink.json
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.C2DB0606.Up2Date
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.dll
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/refint/Anything.Platform.Windows.dll
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/Anything.Platform.Windows.pdb
+/home/vesno/Anything/Anything.Platform.Windows/obj/Debug/net10.0-windows/ref/Anything.Platform.Windows.dll

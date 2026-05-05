@@ -1,0 +1,89 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Anything.UI.Avalonia.ViewModels"
+        x:Class="Anything.UI.Avalonia.Views.SettingsWindow"
+        Title="Settings"
+        Width="500"
+        Height="400"
+        WindowStartupLocation="CenterOwner"
+        Background="#202020">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="*,Auto"
+          Margin="24">
+        <!-- Settings content -->
+        <StackPanel Grid.Row="0"
+                    Spacing="16">
+            <TextBlock Text="Settings"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="White" />
+
+            <!-- Theme -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Theme:"
+                           Foreground="White" />
+                <ComboBox SelectedIndex="{Binding SelectedThemeIndex}"
+                          Background="#101010"
+                          Foreground="White"
+                          HorizontalAlignment="Stretch">
+                    <ComboBoxItem>Dark</ComboBoxItem>
+                    <ComboBoxItem>Light</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Native Titlebar -->
+            <CheckBox IsChecked="{Binding UseNativeTitleBar}"
+                      Foreground="White">
+                Use native titlebar
+            </CheckBox>
+
+            <!-- Max Results -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Max search results:"
+                           Foreground="White" />
+                <TextBox Text="{Binding MaxResults}"
+                        Background="#101010"
+                        Foreground="White"
+                        BorderBrush="#404040" />
+            </StackPanel>
+
+            <!-- Language -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Language:"
+                           Foreground="White" />
+                <ComboBox SelectedIndex="{Binding SelectedLanguageIndex}"
+                          Background="#101010"
+                          Foreground="White"
+                          HorizontalAlignment="Stretch">
+                    <ComboBoxItem>English</ComboBoxItem>
+                    <ComboBoxItem>Русский</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8"
+                    Margin="0,16,0,0">
+            <Button Content="Cancel"
+                    Background="Transparent"
+                    Foreground="#888888"
+                    BorderBrush="#444444"
+                    Click="Cancel_Click"
+                    Padding="16,8" />
+            <Button Content="Save"
+                    Background="#0078D4"
+                    Foreground="White"
+                    BorderBrush="Transparent"
+                    Click="Save_Click"
+                    Padding="16,8" />
+        </StackPanel>
+    </Grid>
+
+</Window>

@@ -1,71 +1,125 @@
-# ![alt text](https://github.com/RandomSoftMakers/Anything/blob/main/icon.png) Anything 
-Молниеносный локальный поиск по файлам для Windows, Linux и macOS.  
-Минималистичный интерфейс, мгновенная выдача, открытый исходный код.
+# ![icon](https://github.com/RandomSoftMakers/Anything/blob/main/icon.png) Anything
+
+Lightning-fast local file search for Windows, Linux, and macOS.  
+Minimalist interface, instant results, open source.
 
 ![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4CAF50)
 ![Tech](https://img.shields.io/badge/.NET-10.0-512BD4)
+![UI](https://img.shields.io/badge/UI-Avalonia%20%7C%20WPF-9B59B6)
 
 ---
 
-## 🚀 Возможности
+## Features
 
-- ⚡ Быстрый поиск по имени (без индекса)
-- 🎨 Тёмная тема
-- 🔍 Умная фильтрация результатов
-- 🧩 Чистая архитектура MVVM
-- 🪟 Нативный интерфейс WPF
-- 🔧 Простое расширение и модификация
-
----
-
-# 📊 Сравнение Anything vs Everything vs fsearch vs ripgrep
-
-| Характеристика | **Anything** | **Everything** | **fsearch** | **ripgrep** |
-|----------------|--------------|----------------|-------------|-------------|
-| **Платформы** | Windows, Linux, macOS | Windows | Linux, Windows (WSL), macOS | Windows, Linux, macOS |
-| **Тип поиска** | По имени (без индекса) | По имени | По имени | Полнотекстовый (CLI) |
-| **Скорость поиска** | Быстрая, зависит от размера диска | ⚡ Мгновенная (индекс) | ⚡ Мгновенная (индекс) | Очень высокая (сканирование) |
-| **Индексация файловой системы** | ❌ Нет | ✔ Да | ✔ Да | ❌ Нет |
-| **Поиск по содержимому файлов** | ❌ Нет | ❌ | ❌ | ✔ Да |
-| **Интерфейс** | WPF | Win32 | GTK | CLI |
-| **Тёмная тема** | ✔ | Частично | ✔ | CLI |
-| **Расширяемость** | Высокая | Низкая | Средняя | Высокая |
-| **Открытый исходный код** | ✔ GPL‑3.0 | ✖ Закрытый | ✔ GPL‑2.0 | ✔ MIT |
-| **Потребление ресурсов** | Среднее | Очень низкое | Низкое | Зависит от проекта |
-| **Поддержка больших дисков** | ⚠ Зависит от скорости диска | ✔ | ✔ | ✔ |
-| **Поддержка RegEx** | Планируется | ✔ | ✔ | ✔ |
-| **Горячие клавиши** | ✔ | ✔ | ✔ | CLI |
-| **Плагины** | Планируется | ✖ | ✖ | Через shell |
-| **Установка** | Бинарник / сборка | EXE | Пакеты Linux | CLI |
-| **Целевая аудитория** | Пользователи + разработчики | Массовые пользователи Windows | Linux‑пользователи | Разработчики |
+- **Fast name search** (no index required)
+- **Dark and Light themes** with runtime switching
+- **Smart result filtering**
+- **Clean MVVM architecture**
+- **Cross-platform UI** (Avalonia for all platforms, WPF for Windows)
+- **First-run experience** with setup wizard
+- **Settings system** with persistent configuration
+- **Native or custom titlebar** support
+- **Multiple package formats** (DEB, RPM, MSI)
+- **Easy to extend and modify**
 
 ---
 
-## 📸 Скриншоты
+## Quick Install
 
-![Тёмная тема](https://github.com/RandomSoftMakers/Anything/blob/main/ScreenShot_Dark)
-![Светлая тема](https://github.com/RandomSoftMakers/Anything/blob/main/Screenshot_Light)
+**Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/RandomSoftMakers/Anything/main/setup-linux.sh | bash
+```
 
----
+**Windows:**
+Download and run the MSI installer from [Releases](https://github.com/RandomSoftMakers/Anything/releases).
 
-## 🛠 Технологии
-
-- .NET 10.0  
-- WPF  
-- C# 12  
-- Windows API (Mica / Acrylic)  
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 ---
 
-## 📦 Установка
+## Comparison: Anything vs Everything vs fsearch vs ripgrep
 
-### Вариант 1: Готовый бинарник  
-Скачай последнюю сборку из раздела **Releases**.
+| Feature | **Anything** | **Everything** | **fsearch** | **ripgrep** |
+|---------|---------------|----------------|-------------|-------------|
+| **Platforms** | Windows, Linux, macOS | Windows | Linux, Windows (WSL), macOS | Windows, Linux, macOS |
+| **Search Type** | By name (no index) | By name | By name | Full-text (CLI) |
+| **Search Speed** | Fast, disk-dependent | Instant (index) | Instant (index) | Very high (scan) |
+| **FS Indexing** | No | Yes | Yes | No |
+| **Content Search** | No | No | No | Yes |
+| **UI** | Avalonia / WPF | Win32 | GTK | CLI |
+| **Dark Theme** | Yes | Partial | Yes | CLI |
+| **Extensibility** | High | Low | Medium | High |
+| **Open Source** | GPL-3.0 | Closed | GPL-2.0 | MIT |
+| **Resource Usage** | Medium | Very low | Low | Project-dependent |
+| **Large Disk Support** | Disk-speed dependent | Yes | Yes | Yes |
+| **RegEx Support** | Planned | Yes | Yes | Yes |
+| **Hotkeys** | Yes | Yes | Yes | CLI |
+| **Plugins** | Planned | No | No | Via shell |
+| **Installation** | Binary / Package / Build | EXE | Linux packages | CLI |
+| **Target Audience** | Users + Developers | Windows mass users | Linux users | Developers |
 
-### Вариант 2: Сборка из исходников
+---
+
+## Screenshots
+
+![Dark Theme](https://github.com/RandomSoftMakers/Anything/blob/main/ScreenShot_Dark)
+![Light Theme](https://github.com/RandomSoftMakers/Anything/blob/main/Screenshot_Light)
+
+---
+
+## Technologies
+
+- .NET 10.0
+- Avalonia UI 11.2
+- WPF (Windows-only)
+- C# 12
+
+---
+
+## Building from Source
 
 ```bash
 git clone https://github.com/RandomSoftMakers/anything.git
 cd anything
-dotnet build Anything.sln
+./build.sh  # or build.ps1 on Windows
+```
+
+### Running Avalonia (Cross-platform)
+```bash
+dotnet run --project Anything.UI.Avalonia/Anything.UI.Avalonia.csproj
+```
+
+### Running WPF (Windows only)
+```bash
+dotnet run --project Anything.UI.Wpf/Anything.UI.Wpf.csproj
+```
+
+---
+
+## First Run
+
+On first launch, Anything shows a setup wizard to configure:
+- Theme (Dark/Light)
+- Titlebar preference (Native/Custom)
+- Language
+
+Access settings anytime by clicking the gear icon () in the titlebar.
+
+---
+
+## Package Downloads
+
+- **DEB** (Debian/Ubuntu): `anything.deb`
+- **RPM** (Fedora/RHEL): `anything.rpm`
+- **MSI** (Windows): `Anything-Setup.msi`
+- **Portable**: Single-file executables for Windows, Linux, and macOS
+
+See [GitHub Releases](https://github.com/RandomSoftMakers/Anything/releases) for all downloads.
+
+---
+
+## License
+
+GPL-3.0 - See [LICENSE](LICENSE) file for details.

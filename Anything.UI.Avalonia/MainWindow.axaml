@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Anything.UI.Avalonia.ViewModels"
+        x:Class="Anything.UI.Avalonia.Views.MainWindow"
+        Title="Anything"
+        Width="900"
+        Height="500"
+        Background="#1A1A1A"
+        x:Name="MainWindowControl">
+
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Custom title bar (shown when not using native titlebar) -->
+        <Border Grid.Row="0"
+                Background="#202020"
+                PointerPressed="TitleBar_PointerPressed"
+                x:Name="CustomTitleBar"
+                IsVisible="False">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="Anything"
+                           VerticalAlignment="Center"
+                           Margin="12,0,8,0"
+                           Foreground="White"
+                           FontSize="14" />
+
+                <TextBox Grid.Column="1"
+                         Margin="0,4,8,4"
+                         Background="#101010"
+                         Foreground="White"
+                         BorderBrush="#404040"
+                         Padding="8"
+                         FontSize="14"
+                         Watermark="Search files..."
+                         Text="{Binding Query, Mode=TwoWay}" />
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            Spacing="0">
+                    <Button Classes="titleButton"
+                            Content="⚙"
+                            Click="Settings_Click"
+                            Width="46"
+                            Height="32"
+                            ToolTip.Tip="Settings" />
+                    <Button Classes="titleButton"
+                            Content="—"
+                            Click="Minimize_Click"
+                            Width="46"
+                            Height="32" />
+                    <Button Classes="titleButton"
+                            Content="▢"
+                            Click="Maximize_Click"
+                            Width="46"
+                            Height="32" />
+                    <Button Classes="titleButton close"
+                            Content="✕"
+                            Click="Close_Click"
+                            Width="46"
+                            Height="32" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main content -->
+        <Grid Grid.Row="1"
+              RowDefinitions="Auto,*"
+              Margin="12">
+        <!-- Results info -->
+             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4" Spacing="8">
+                 <TextBlock Text="{Binding Results.Count, StringFormat='Found: {0} results'}"
+                            Foreground="#888888" />
+                 <TextBlock Text="{Binding Query, StringFormat='Query: {0}'}"
+                            Foreground="#888888" />
+             </StackPanel>
+
+             <!-- Results list -->
+             <ListBox Grid.Row="1"
+                      ItemsSource="{Binding Results}"
+                      Background="#101010"
+                      Foreground="White"
+                      BorderBrush="#404040"
+                      DoubleTapped="ListBox_DoubleTapped"
+                      Loaded="ListBox_Loaded">
+                 <ListBox.DataTemplates>
+                     <DataTemplate x:DataType="vm:FileEntryViewModel">
+                         <Grid ColumnDefinitions="250,*"
+                               Margin="4">
+                             <TextBlock Grid.Column="0"
+                                        Text="{Binding Name}"
+                                        Foreground="White" />
+                             <TextBlock Grid.Column="1"
+                                        Text="{Binding Path}"
+                                        Foreground="#888888"
+                                        TextTrimming="CharacterEllipsis" />
+                         </Grid>
+                     </DataTemplate>
+                 </ListBox.DataTemplates>
+             </ListBox>
+        </Grid>
+    </Grid>
+
+    <Window.Styles>
+        <Style Selector="Button.titleButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.titleButton:pointerover">
+            <Setter Property="Background" Value="#333333" />
+        </Style>
+        <Style Selector="Button.titleButton.close:pointerover">
+            <Setter Property="Background" Value="#C42B1C" />
+        </Style>
+    </Window.Styles>
+
+</Window>

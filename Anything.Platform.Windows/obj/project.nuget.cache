@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "jLjsm0DzR/4=",
+  "success": true,
+  "projectFilePath": "/home/vesno/Anything/Anything.Platform.Windows/Anything.Platform.Windows.csproj",
+  "expectedPackageFiles": [
+    "/home/vesno/.nuget/packages/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg.sha512",
+    "/home/vesno/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512",
+    "/home/vesno/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.4/microsoft.aspnetcore.app.ref.10.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}

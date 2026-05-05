@@ -1,0 +1,152 @@
+name: Build and Package Anything
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [Release]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-x64
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore Anything.sln
+
+    - name: Build Avalonia (Cross-platform)
+      run: dotnet build Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }}
+
+    - name: Publish Avalonia (Linux/macOS)
+      if: matrix.rid == 'linux-x64' || matrix.rid == 'osx-x64'
+      run: |
+        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o dist/${{ matrix.rid }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Anything-${{ matrix.rid }}
+        path: dist/${{ matrix.rid }}/
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore Anything.sln
+
+    - name: Build Avalonia
+      run: dotnet build Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }}
+
+    - name: Publish Avalonia (Windows)
+      run: |
+        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -o dist/win-x64
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Anything-Windows-x64
+        path: dist/win-x64/
+
+  build-android:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Install Android workload
+      run: dotnet workload install android
+
+    - name: Build Android
+      run: dotnet publish Anything.UI.Avalonia.Android/Anything.UI.Avalonia.Android.csproj -c Release -r android-arm64 -o dist/android
+
+    - name: Upload Android Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Anything-Android
+        path: dist/android/
+
+  build-packages:
+    needs: [build, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Install packaging tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y rpm devscripts debhelper
+
+    - name: Download Linux build
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-linux-x64
+        path: dist/linux-x64
+
+    - name: Build DEB package
+      run: |
+        mkdir -p packaging/deb/anything/usr/bin
+        mkdir -p packaging/deb/anything/usr/share/applications
+        cp dist/linux-x64/Anything.UI.Avalonia packaging/deb/anything/usr/bin/anything
+        chmod +x packaging/deb/anything/usr/bin/anything
+        mkdir -p packaging/deb/anything/DEBIAN
+        cp packaging/deb/control packaging/deb/anything/DEBIAN/
+        cp packaging/deb/postinst packaging/deb/anything/DEBIAN/
+        chmod +x packaging/deb/anything/DEBIAN/postinst
+        dpkg-deb --build packaging/deb/anything anything.deb
+
+    - name: Build RPM package
+      run: |
+        rpmbuild -bb packaging/rpm/anything.spec
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          anything.deb
+          *.rpm
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

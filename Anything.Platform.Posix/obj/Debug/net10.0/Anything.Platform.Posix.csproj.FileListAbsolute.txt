@@ -1,0 +1,16 @@
+/home/vesno/Anything/Anything.Platform.Posix/bin/Debug/net10.0/Anything.Platform.Posix.deps.json
+/home/vesno/Anything/Anything.Platform.Posix/bin/Debug/net10.0/Anything.Platform.Posix.dll
+/home/vesno/Anything/Anything.Platform.Posix/bin/Debug/net10.0/Anything.Platform.Posix.pdb
+/home/vesno/Anything/Anything.Platform.Posix/bin/Debug/net10.0/Anything.Core.dll
+/home/vesno/Anything/Anything.Platform.Posix/bin/Debug/net10.0/Anything.Core.pdb
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.csproj.AssemblyReference.cache
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.GeneratedMSBuildEditorConfig.editorconfig
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.AssemblyInfoInputs.cache
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.AssemblyInfo.cs
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.csproj.CoreCompileInputs.cache
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.sourcelink.json
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.7C18B2C8.Up2Date
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.dll
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/refint/Anything.Platform.Posix.dll
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/Anything.Platform.Posix.pdb
+/home/vesno/Anything/Anything.Platform.Posix/obj/Debug/net10.0/ref/Anything.Platform.Posix.dll

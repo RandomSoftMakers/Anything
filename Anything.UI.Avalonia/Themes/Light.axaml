@@ -1,0 +1,57 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="#F3F3F3" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="#000000" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#FFFFFFFF" />
+        <Setter Property="Foreground" Value="#000000" />
+        <Setter Property="BorderBrush" Value="#33000000" />
+        <Setter Property="CaretBrush" Value="#000000" />
+    </Style>
+
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="#66000000" />
+    </Style>
+
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="#FFFFFFFF" />
+        <Setter Property="Foreground" Value="#000000" />
+        <Setter Property="BorderBrush" Value="#33000000" />
+    </Style>
+
+    <Style Selector="ListBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#000000" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style Selector="ListBoxItem:pointerover">
+        <Setter Property="Background" Value="#22000000" />
+    </Style>
+
+    <Style Selector="ListBoxItem:selected">
+        <Setter Property="Background" Value="#33000000" />
+    </Style>
+
+    <Style Selector="ListBoxItem:selected:pointerover">
+        <Setter Property="Background" Value="#44000000" />
+    </Style>
+
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="#DDDDDD" />
+    </Style>
+
+    <Style Selector="Thumb">
+        <Setter Property="Background" Value="#AAAAAA" />
+        <Setter Property="BorderBrush" Value="#888888" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+</Styles>
