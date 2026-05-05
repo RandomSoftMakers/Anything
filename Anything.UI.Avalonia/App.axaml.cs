@@ -24,29 +24,47 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        try
         {
-            var mainWindow = new Views.MainWindow();
-            desktop.MainWindow = mainWindow;
-
-            // Create and initialize the search service
-            var indexer = new Anything.Core.Services.FileIndexer();
-            var searchService = new AnythingSearchService(indexer);
-            var viewModel = new MainViewModel(searchService);
-            mainWindow.DataContext = viewModel;
-
-            // Initialize async (build index)
-            _ = viewModel.InitializeAsync();
-
-            // Show first run window if needed (after main window is ready)
-            if (SettingsManager.Current.IsFirstRun)
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                mainWindow.Loaded += (s, e) =>
+                var mainWindow = new Views.MainWindow();
+                desktop.MainWindow = mainWindow;
+
+                // Create and initialize the search service
+                var indexer = new Anything.Core.Services.FileIndexer();
+                var searchService = new AnythingSearchService(indexer);
+                var viewModel = new MainViewModel(searchService);
+                mainWindow.DataContext = viewModel;
+
+                // Initialize async (build index) without blocking startup
+                _ = Task.Run(async () =>
                 {
-                    var firstRunWindow = new Views.FirstRunWindow();
-                    firstRunWindow.ShowDialog(mainWindow);
-                };
+                    try
+                    {
+                        await viewModel.InitializeAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error initializing search: {ex.Message}");
+                    }
+                });
+
+                // Show first run window if needed (after main window is ready)
+                if (SettingsManager.Current.IsFirstRun)
+                {
+                    mainWindow.Loaded += (s, e) =>
+                    {
+                        var firstRunWindow = new Views.FirstRunWindow();
+                        firstRunWindow.ShowDialog(mainWindow);
+                    };
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Fatal error during startup: {ex}");
+            File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-fatal.log"), $"Fatal error: {ex}\n");
         }
 
         base.OnFrameworkInitializationCompleted();

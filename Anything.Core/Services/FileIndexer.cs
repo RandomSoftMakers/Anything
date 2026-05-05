@@ -23,20 +23,20 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
         _isBuilding = true;
         _index.Clear();
 
-        File.AppendAllText("/tmp/anything-index.log", "FileIndexer: Starting to build index...\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-index.log"), "FileIndexer: Starting to build index...\n"); } catch { }
 
         var roots = GetSearchRoots();
 
-        File.AppendAllText("/tmp/anything-index.log", $"FileIndexer: Found {roots.Count()} roots to index\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-index.log"), $"FileIndexer: Found {roots.Count()} roots to index\n"); } catch { }
 
         var tasks = roots.Select(root =>
         {
-            File.AppendAllText("/tmp/anything-index.log", $"FileIndexer: Indexing {root}\n");
+            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-index.log"), $"FileIndexer: Indexing {root}\n"); } catch { }
             return Task.Run(() => IndexDirectory(root, cancellationToken), cancellationToken);
         });
         await Task.WhenAll(tasks);
 
-        File.AppendAllText("/tmp/anything-index.log", $"FileIndexer: Index build complete. Total files: {_index.Count}\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-index.log"), $"FileIndexer: Index build complete. Total files: {_index.Count}\n"); } catch { }
 
         SetupFileWatchers(roots);
         _isBuilding = false;
@@ -46,32 +46,18 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
     {
         if (OperatingSystem.IsWindows())
         {
-            return DriveInfo.GetDrives()
-                .Where(d => d.IsReady)
-                .Select(d => d.RootDirectory.FullName);
+            // Only index user directories, not all drives
+            return new List<string>
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+            };
         }
 
-        // Linux/macOS - index home directory and common locations
-        var paths = new List<string>
+        // Linux/macOS - only index home directory
+        return new List<string>
         {
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
         };
-
-        // Add common directories if they exist
-        var commonPaths = new[]
-        {
-            "/home",
-            "/opt",
-            "/usr/local"
-        };
-
-        foreach (var path in commonPaths)
-        {
-            if (Directory.Exists(path))
-                paths.Add(path);
-        }
-
-        return paths;
     }
 
     private void IndexDirectory(string root, CancellationToken cancellationToken)

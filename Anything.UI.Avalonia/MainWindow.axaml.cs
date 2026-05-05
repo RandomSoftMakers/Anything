@@ -113,10 +113,10 @@ public partial class MainWindow : Window
 
         private void ListBox_Loaded(object? sender, RoutedEventArgs e)
         {
-            File.AppendAllText("/tmp/anything-ui.log", "ListBox loaded!\n");
+            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-ui.log"), "ListBox loaded!\n"); } catch { }
             if (sender is ListBox listBox)
             {
-                File.AppendAllText("/tmp/anything-ui.log", $"ListBox.Items.Count = {listBox.Items.Count}\n");
+                try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-ui.log"), $"ListBox.Items.Count = {listBox.Items.Count}\n"); } catch { }
             }
         }
 }

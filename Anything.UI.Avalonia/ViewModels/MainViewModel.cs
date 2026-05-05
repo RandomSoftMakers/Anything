@@ -23,10 +23,10 @@ public class MainViewModel : ViewModelBase
         get => _query;
         set
         {
-            File.AppendAllText("/tmp/anything-search.log", $"Query changed to: {value}\n");
+            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"Query changed to: {value}\n"); } catch { }
             if (SetProperty(ref _query, value))
             {
-                File.AppendAllText("/tmp/anything-search.log", $"Property set, calling SearchAsync with: {_query}\n");
+                try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"Property set, calling SearchAsync with: {_query}\n"); } catch { }
                 _ = SearchAsync(_query);
             }
         }
@@ -42,30 +42,30 @@ public class MainViewModel : ViewModelBase
     {
         Results.CollectionChanged += (s, e) =>
         {
-            File.AppendAllText("/tmp/anything-search.log", $"Results collection changed! Count: {Results.Count}\n");
+            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"Results collection changed! Count: {Results.Count}\n"); } catch { }
         };
-        File.AppendAllText("/tmp/anything-search.log", "MainViewModel default constructor called\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), "MainViewModel default constructor called\n"); } catch { }
     }
 
     public MainViewModel(AnythingSearchService searchService)
     {
         Results.CollectionChanged += (s, e) =>
         {
-            File.AppendAllText("/tmp/anything-search.log", $"Results collection changed! Count: {Results.Count}\n");
+            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"Results collection changed! Count: {Results.Count}\n"); } catch { }
         };
         _searchService = searchService;
         _useNativeTitleBar = SettingsManager.Current.UseNativeTitleBar;
 
-        File.AppendAllText("/tmp/anything-search.log", "MainViewModel with service created\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), "MainViewModel with service created\n"); } catch { }
         _ = TestSearchAsync();
     }
 
     private async Task TestSearchAsync()
     {
         await Task.Delay(5000); // Wait for UI to load
-        File.AppendAllText("/tmp/anything-search.log", "Running test search for 'test'...\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), "Running test search for 'test'...\n"); } catch { }
         Query = "test";
-        File.AppendAllText("/tmp/anything-search.log", $"Query set to 'test', Results count: {Results.Count}\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"Query set to 'test', Results count: {Results.Count}\n"); } catch { }
     }
 
     public async Task InitializeAsync()
@@ -107,7 +107,7 @@ public class MainViewModel : ViewModelBase
             Results.Add(new FileEntryViewModel(item));
         }
         OnPropertyChanged(nameof(Results));
-        File.AppendAllText("/tmp/anything-search.log", $"After adding, Results.Count = {Results.Count}\n");
+        try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "anything-search.log"), $"After adding, Results.Count = {Results.Count}\n"); } catch { }
     }
 
     public void OpenFile(FileEntryViewModel? entry)
