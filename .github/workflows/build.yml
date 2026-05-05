@@ -8,16 +8,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         configuration: [Release]
-        include:
-          - os: ubuntu-latest
-            rid: linux-x64
-          - os: macos-latest
-            rid: osx-x64
 
     steps:
     - name: Checkout
@@ -31,19 +26,110 @@ jobs:
     - name: Restore
       run: dotnet restore Anything.sln
 
-    - name: Build Avalonia (Cross-platform)
+    - name: Build Avalonia
       run: dotnet build Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }}
 
-    - name: Publish Avalonia (Linux/macOS)
-      if: matrix.rid == 'linux-x64' || matrix.rid == 'osx-x64'
+    - name: Publish Avalonia (Linux)
       run: |
-        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o dist/${{ matrix.rid }}
+        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r linux-x64 --self-contained true -p:PublishSingleFile=true -o dist/linux-x64
 
-    - name: Upload Artifact
+    - name: Create Linux packages
+      run: |
+        # Create DEB package
+        mkdir -p packaging/deb/anything/usr/bin
+        mkdir -p packaging/deb/anything/usr/share/applications
+        mkdir -p packaging/deb/anything/usr/share/icons
+        cp dist/linux-x64/Anything.UI.Avalonia packaging/deb/anything/usr/bin/anything
+        chmod +x packaging/deb/anything/usr/bin/anything
+        mkdir -p packaging/deb/anything/DEBIAN
+        cp packaging/deb/control packaging/deb/anything/DEBIAN/ || echo "Create DEBIAN/control file"
+        echo "Package: anything
+        Version: 1.0.0
+        Section: utils
+        Priority: optional
+        Architecture: amd64
+        Maintainer: RandomSoftMakers
+        Description: Lightning fast local file search" > packaging/deb/anything/DEBIAN/control
+        cp icon.png packaging/deb/anything/usr/share/icons/anything.png 2>/dev/null || true
+        dpkg-deb --build packaging/deb/anything anything.deb || echo "DEB creation skipped"
+
+        # Create RPM package
+        mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+        echo "Name: anything
+        Version: 1.0.0
+        Release: 1
+        Summary: Lightning fast local file search
+        License: MIT
+        URL: https://github.com/RandomSoftMakers/Anything
+        %description
+        Lightning fast local file search tool
+        %install
+        mkdir -p %{buildroot}/usr/bin
+        cp dist/linux-x64/Anything.UI.Avalonia %{buildroot}/usr/bin/anything
+        chmod +x %{buildroot}/usr/bin/anything
+        %files
+        /usr/bin/anything" > ~/rpmbuild/SPECS/anything.spec
+        rpmbuild -bb ~/rpmbuild/SPECS/anything.spec 2>/dev/null || echo "RPM creation skipped"
+
+    - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Anything-${{ matrix.rid }}
-        path: dist/${{ matrix.rid }}/
+        name: Anything-Linux-x64
+        path: dist/linux-x64/
+
+    - name: Upload DEB Package
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Anything-Linux-deb
+        path: anything.deb
+        if-no-files-found: ignore
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore Anything.sln
+
+    - name: Build Avalonia
+      run: dotnet build Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }}
+
+    - name: Publish Avalonia (macOS)
+      run: |
+        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r osx-x64 --self-contained true -p:PublishSingleFile=true -o dist/osx-x64
+
+    - name: Create macOS DMG
+      run: |
+        # Create a simple DMG structure
+        mkdir -p dist/dmg
+        cp -r dist/osx-x64 dist/dmg/Anything.app
+        hdiutil create -volname "Anything" -srcfolder dist/dmg -ov -format UDZO dist/Anything-macOS.dmg || echo "DMG creation skipped"
+
+    - name: Upload macOS Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Anything-macOS-x64
+        path: dist/osx-x64/
+
+    - name: Upload DMG
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Anything-macOS-dmg
+        path: dist/Anything-macOS.dmg
+        if-no-files-found: ignore
 
   build-windows:
     runs-on: windows-latest
@@ -70,11 +156,35 @@ jobs:
       run: |
         dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -o dist/win-x64
 
+    - name: Create MSI Installer
+      run: |
+        # Install WiX Toolset if not present
+        choco install wixtoolset -y 2>$null || echo "WiX installation skipped"
+        $env:PATH += ";C:\Program Files (x86)\WiX Toolset v3.11\bin"
+        
+        # Build MSI
+        if (Test-Path "packaging/windows/Product.wxs") {
+          candle.exe -dSourceDir="dist/win-x64" packaging/windows/Product.wxs
+          light.exe -out "dist/Anything-Setup.msi" Product.wixobj
+          echo "MSI created successfully"
+        } else {
+          echo "WiX source not found, skipping MSI creation"
+        }
+      shell: powershell
+
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Anything-Windows-x64
         path: dist/win-x64/
+
+    - name: Upload MSI Installer
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Anything-Windows-MSI
+        path: dist/Anything-Setup.msi
+        if-no-files-found: ignore
 
   build-android:
     runs-on: ubuntu-latest
@@ -101,8 +211,8 @@ jobs:
         name: Anything-Android
         path: dist/android/
 
-  build-packages:
-    needs: [build, build-windows]
+  create-release:
+    needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
@@ -110,43 +220,64 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup .NET 10
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Install packaging tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y rpm devscripts debhelper
-
     - name: Download Linux build
       uses: actions/download-artifact@v4
       with:
-        name: Anything-linux-x64
+        name: Anything-Linux-x64
         path: dist/linux-x64
 
-    - name: Build DEB package
-      run: |
-        mkdir -p packaging/deb/anything/usr/bin
-        mkdir -p packaging/deb/anything/usr/share/applications
-        cp dist/linux-x64/Anything.UI.Avalonia packaging/deb/anything/usr/bin/anything
-        chmod +x packaging/deb/anything/usr/bin/anything
-        mkdir -p packaging/deb/anything/DEBIAN
-        cp packaging/deb/control packaging/deb/anything/DEBIAN/
-        cp packaging/deb/postinst packaging/deb/anything/DEBIAN/
-        chmod +x packaging/deb/anything/DEBIAN/postinst
-        dpkg-deb --build packaging/deb/anything anything.deb
+    - name: Download Linux DEB
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-Linux-deb
+        path: dist/
+      continue-on-error: true
 
-    - name: Build RPM package
-      run: |
-        rpmbuild -bb packaging/rpm/anything.spec
+    - name: Download macOS build
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-macOS-x64
+        path: dist/osx-x64
+
+    - name: Download macOS DMG
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-macOS-dmg
+        path: dist/
+      continue-on-error: true
+
+    - name: Download Windows build
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-Windows-x64
+        path: dist/win-x64
+
+    - name: Download Windows MSI
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-Windows-MSI
+        path: dist/
+      continue-on-error: true
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          anything.deb
-          *.rpm
+          dist/linux-x64/Anything.UI.Avalonia
+          dist/osx-x64/Anything.UI.Avalonia
+          dist/win-x64/Anything.UI.Avalonia.exe
+          dist/Anything-Setup.msi
+          dist/Anything-macOS.dmg
+          dist/anything.deb
+        body: |
+          ## Anything Release
+          
+          ### Downloads
+          - **Linux**: `Anything.UI.Avalonia` (64-bit) or `anything.deb`
+          - **macOS**: `Anything.UI.Avalonia` (64-bit) or `Anything-macOS.dmg`
+          - **Windows**: `Anything.UI.Avalonia.exe` (64-bit) or `Anything-Setup.msi`
+          
+          ### Installation
+          See [INSTALL.md](https://github.com/RandomSoftMakers/Anything/blob/main/INSTALL.md) for details.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

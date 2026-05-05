@@ -14,7 +14,18 @@ chmod +x setup-linux.sh
 ```
 
 ### Windows
-Download the installer from [Releases](https://github.com/RandomSoftMakers/Anything/releases) and run `Anything-Setup.msi`.
+Download and run the setup script:
+```powershell
+# Using PowerShell
+.\setup-windows.ps1
+```
+
+Or use the batch file (right-click and "Run as Administrator"):
+```
+setup-windows.bat
+```
+
+Or download the installer from [Releases](https://github.com/RandomSoftMakers/Anything/releases) and run `Anything-Setup.msi`.
 
 ### Build from source
 ```bash

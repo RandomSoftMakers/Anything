@@ -4,8 +4,8 @@
            Name="Anything"
            Language="1033"
            Version="1.0.0"
-           Manufacturer="Anything Team"
-           UpgradeCode="YOUR-GUID-HERE">
+           Manufacturer="RandomSoftMakers"
+           UpgradeCode="3F2504E0-4F89-11D3-9A0C-0305E82C3301">
 
     <Package InstallerVersion="200"
               Compressed="yes"
@@ -33,12 +33,13 @@
         <Directory Id="ProgramMenuSubfolder"
                    Name="Anything" />
       </Directory>
+      <Directory Id="DesktopFolder" />
     </Directory>
 
     <ComponentGroup Id="ProductComponents"
                     Directory="INSTALLFOLDER">
       <Component Id="MainExecutable"
-                 Guid="YOUR-COMPONENT-GUID-HERE">
+                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3302">
         <File Id="AnythingExe"
               Source="$(var.SourceDir)\Anything.UI.Avalonia.exe"
               KeyPath="yes">
@@ -48,9 +49,24 @@
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="AnythingIcon.exe"
                     IconIndex="0" />
+          <Shortcut Id="DesktopShortcut"
+                    Directory="DesktopFolder"
+                    Name="Anything"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AnythingIcon.exe"
+                    IconIndex="0" />
         </File>
       </Component>
+      <Component Id="IconFile"
+                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3303">
+        <File Id="IconPng"
+              Source="$(var.SourceDir)\icon.png"
+              KeyPath="yes" />
+      </Component>
     </ComponentGroup>
+
+    <Icon Id="AnythingIcon.exe"
+          SourceFile="$(var.SourceDir)\icon.png" />
 
   </Product>
 </Wix>
