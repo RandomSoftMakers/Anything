@@ -159,7 +159,7 @@ jobs:
     - name: Create MSI Installer
       run: |
         # Install WiX Toolset if not present
-        choco install wixtoolset -y 2>$null || echo "WiX installation skipped"
+        choco install wixtoolset -y 2>$null; if (-not $?) { echo "WiX installation skipped" }
         $env:PATH += ";C:\Program Files (x86)\WiX Toolset v3.11\bin"
         
         # Build MSI
