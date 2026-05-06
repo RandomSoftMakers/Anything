@@ -6,10 +6,15 @@ Minimalist interface, instant results, open source.
 ![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4CAF50)
 ![Tech](https://img.shields.io/badge/.NET-10.0-512BD4)
-![UI](https://img.shields.io/badge/UI-Avalonia%20%7C%20WPF-9B59B6)
+![UI](https://img.shields.io/badge/UI-Avalonia)
 
 ---
-
+## Why?
+- I thing everyone knows about Everything on Windows. One of the best search apps, but it not open source.
+- And i decided to create cross platform Everything copy.
+- Currently Anything already can beat Everything on SSDs, but that's not all. In future we will add Plugins, index, more launguages and settings.
+- That's all. I hope you enjoy using my program!
+---
 ## Features
 
 - **Fast name search** (no index required)
@@ -48,7 +53,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 | **Search Speed** | Fast, disk-dependent | Instant (index) | Instant (index) | Very high (scan) |
 | **FS Indexing** | No | Yes | Yes | No |
 | **Content Search** | No | No | No | Yes |
-| **UI** | Avalonia / WPF | Win32 | GTK | CLI |
+| **UI** | Avalonia | Win32 | GTK | CLI |
 | **Dark Theme** | Yes | Partial | Yes | CLI |
 | **Extensibility** | High | Low | Medium | High |
 | **Open Source** | GPL-3.0 | Closed | GPL-2.0 | MIT |
