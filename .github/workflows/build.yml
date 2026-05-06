@@ -156,6 +156,15 @@ jobs:
       run: |
         dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -o dist/win-x64
 
+    - name: Copy icon to dist
+      run: |
+        if (Test-Path "icon.png") {
+          Copy-Item "icon.png" -Destination "dist/win-x64/" -Force
+          echo "Icon copied to dist/win-x64"
+        } else {
+          echo "icon.png not found in repo root"
+        }
+
     - name: Create MSI Installer
       run: |
         # Install WiX Toolset if not present
@@ -175,7 +184,7 @@ jobs:
           }
         }
 
-        # Build MSI using the existing script
+        # Build MSI
         if (Test-Path "packaging/windows/Product.wxs") {
           cd packaging/windows
           # Fix: pass SourceDir as WiX variable properly
