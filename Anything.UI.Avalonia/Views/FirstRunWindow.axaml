@@ -42,14 +42,17 @@
                           HorizontalAlignment="Stretch">
                     <ComboBoxItem>Dark</ComboBoxItem>
                     <ComboBoxItem>Light</ComboBoxItem>
-                </ComboBox>
+                    <ComboBoxItem>Catppuccin Mocha</ComboBoxItem>
+                    <ComboBoxItem>Catppuccin Latte</ComboBoxItem>
+                    <ComboBoxItem>Solarized Dark</ComboBoxItem>
+                    <ComboBoxItem>Solarized Light</ComboBoxItem>
+                    <ComboBoxItem>VS Code Dark</ComboBoxItem>
+                    <ComboBoxItem>GNOME</ComboBoxItem>
+                    <ComboBoxItem>Breeze Dark</ComboBoxItem>
+                    <ComboBoxItem>Breeze Light</ComboBoxItem>
+                    <ComboBoxItem>Liquid Glass</ComboBoxItem>
+                    </ComboBox>
             </StackPanel>
-
-            <!-- Titlebar preference -->
-            <CheckBox IsChecked="{Binding UseNativeTitleBar}"
-                      Foreground="White">
-                Use native titlebar
-            </CheckBox>
 
             <!-- Language selection -->
             <StackPanel Spacing="8">
@@ -62,6 +65,11 @@
                           HorizontalAlignment="Stretch">
                     <ComboBoxItem>English</ComboBoxItem>
                     <ComboBoxItem>Русский</ComboBoxItem>
+                    <ComboBoxItem>Deutsch</ComboBoxItem>
+                    <ComboBoxItem>Français</ComboBoxItem>
+                    <ComboBoxItem>Español</ComboBoxItem>
+                    <ComboBoxItem>中文</ComboBoxItem>
+                    <ComboBoxItem>日本語</ComboBoxItem>
                 </ComboBox>
             </StackPanel>
         </StackPanel>

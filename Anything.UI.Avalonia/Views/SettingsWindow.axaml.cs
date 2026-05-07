@@ -20,9 +20,13 @@ public partial class SettingsWindow : Window
     private void Save_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is SettingsViewModel vm)
-        {
             vm.Save();
-        }
         Close();
+    }
+
+    private void About_Click(object? sender, RoutedEventArgs e)
+    {
+        var about = new AboutWindow();
+        about.ShowDialog(this);
     }
 }

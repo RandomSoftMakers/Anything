@@ -70,10 +70,14 @@ dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj \
     -p:PublishSingleFile=true \
     -o ./dist/linux-x64
 
-# Install to /usr/local/bin
-echo -e "${YELLOW}Installing to /usr/local/bin...${NC}"
-$SUDO cp ./dist/linux-x64/Anything.UI.Avalonia /usr/local/bin/anything
-$SUDO chmod +x /usr/local/bin/anything
+# Install to /usr/local/lib/anything
+echo -e "${YELLOW}Installing to /usr/local/lib/anything...${NC}"
+$SUDO mkdir -p /usr/local/lib/anything
+$SUDO cp -r ./dist/linux-x64/* /usr/local/lib/anything/
+$SUDO chmod +x /usr/local/lib/anything/Anything.UI.Avalonia
+
+# Create symlink in PATH
+$SUDO ln -sf /usr/local/lib/anything/Anything.UI.Avalonia /usr/local/bin/anything
 
 # Create desktop entry
 echo -e "${YELLOW}Creating desktop entry...${NC}"

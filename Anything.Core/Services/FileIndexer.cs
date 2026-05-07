@@ -8,7 +8,13 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
 {
     private readonly ConcurrentDictionary<string, FileEntry> _index = new();
     private readonly List<FileSystemWatcher> _watchers = new();
+    private readonly PluginManager? _pluginManager;
     private bool _isBuilding;
+
+    public FileIndexer(PluginManager? pluginManager = null)
+    {
+        _pluginManager = pluginManager;
+    }
 
     public event EventHandler<FileEntry>? FileCreated;
     public event EventHandler<FileEntry>? FileDeleted;
@@ -71,6 +77,8 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
 
             try
             {
+                AddDirToIndex(current);
+
                 foreach (var file in Directory.GetFiles(current))
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -88,6 +96,28 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
             {
                 // Ignore access denied errors
             }
+        }
+    }
+
+    private void AddDirToIndex(string dirPath)
+    {
+        try
+        {
+            var info = new DirectoryInfo(dirPath);
+            var entry = new FileEntry
+            {
+                Path = info.FullName,
+                Name = info.Name,
+                Size = 0,
+                LastModifiedUtc = info.LastWriteTimeUtc,
+                IsDirectory = true
+            };
+
+            _index[info.FullName] = entry;
+        }
+        catch
+        {
+            // Ignore errors
         }
     }
 
@@ -112,19 +142,59 @@ public sealed class FileIndexer : IFileIndexProvider, IFileSystemChangeMonitor
         }
     }
 
-    public Task<IEnumerable<FileEntry>> SearchAsync(string query, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<FileEntry>> SearchAsync(string query, SearchOptions? options = null, CancellationToken cancellationToken = default)
     {
+        options ??= new SearchOptions();
         query = query.Trim();
 
         if (string.IsNullOrEmpty(query))
             return Task.FromResult<IEnumerable<FileEntry>>(Array.Empty<FileEntry>());
 
-        var results = _index.Values
-            .Where(e => e.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .Take(500)
+        var comparison = options.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        var results = _index.Values.AsEnumerable();
+
+        if (options.UseRegex)
+        {
+            var regex = new System.Text.RegularExpressions.Regex(query,
+                options.MatchCase ? System.Text.RegularExpressions.RegexOptions.None : System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            results = results.Where(e => regex.IsMatch(e.Name) || (options.MatchPath && regex.IsMatch(e.Path)));
+        }
+        else if (options.MatchWholeWord)
+        {
+            results = results.Where(e =>
+                e.Name.Split(' ').Any(w => w.Equals(query, comparison)) ||
+                (options.MatchPath && e.Path.Split('\\', '/').Any(w => w.Equals(query, comparison))));
+        }
+        else
+        {
+            results = results.Where(e =>
+                e.Name.Contains(query, comparison) ||
+                (options.MatchPath && e.Path.Contains(query, comparison)));
+        }
+
+        if (options.TypeFilter == FilterType.FilesOnly)
+            results = results.Where(e => !e.IsDirectory);
+        else if (options.TypeFilter == FilterType.FoldersOnly)
+            results = results.Where(e => e.IsDirectory);
+
+        if (options.MinSize.HasValue)
+            results = results.Where(e => e.Size >= options.MinSize.Value);
+        if (options.MaxSize.HasValue)
+            results = results.Where(e => e.Size <= options.MaxSize.Value);
+
+        if (options.MinDate.HasValue)
+            results = results.Where(e => e.LastModifiedUtc >= options.MinDate.Value);
+        if (options.MaxDate.HasValue)
+            results = results.Where(e => e.LastModifiedUtc <= options.MaxDate.Value);
+
+        var final = results
+            .Take(options.MaxResults)
             .ToArray();
 
-        return Task.FromResult<IEnumerable<FileEntry>>(results);
+        if (_pluginManager != null)
+            return _pluginManager.ApplyPluginsAsync(query, options, final);
+
+        return Task.FromResult<IEnumerable<FileEntry>>(final);
     }
 
     private void SetupFileWatchers(IEnumerable<string> roots)

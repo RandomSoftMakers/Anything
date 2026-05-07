@@ -4,7 +4,7 @@
            Name="Anything"
            Language="1033"
            Version="1.0.0"
-           Manufacturer="RandomSoftMakers"
+           Manufacturer="AnythingDevelopmentTeam"
            UpgradeCode="3F2504E0-4F89-11D3-9A0C-0305E82C3301">
 
     <Package InstallerVersion="200"
@@ -57,16 +57,28 @@
                     IconIndex="0" />
         </File>
       </Component>
-      <Component Id="IconFile"
-                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3303">
-        <File Id="IconPng"
-              Source="$(var.SourceDir)\icon.png"
+      <Component Id="SkiaDll"
+                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3304">
+        <File Id="libSkiaSharp"
+              Source="$(var.SourceDir)\libSkiaSharp.dll"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="HarfBuzzDll"
+                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3305">
+        <File Id="libHarfBuzzSharp"
+              Source="$(var.SourceDir)\libHarfBuzzSharp.dll"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="AngleDll"
+                 Guid="3F2504E0-4F89-11D3-9A0C-0305E82C3306">
+        <File Id="av_libglesv2"
+              Source="$(var.SourceDir)\av_libglesv2.dll"
               KeyPath="yes" />
       </Component>
     </ComponentGroup>
 
     <Icon Id="AnythingIcon.exe"
-          SourceFile="$(var.SourceDir)\icon.png" />
+          SourceFile="$(var.SourceDir)\Anything.UI.Avalonia.exe" />
 
   </Product>
 </Wix>

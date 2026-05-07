@@ -1,10 +1,11 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Anything.UI.Avalonia.ViewModels"
+        xmlns:local="using:Anything.UI.Avalonia"
         x:Class="Anything.UI.Avalonia.Views.SettingsWindow"
         Title="Settings"
-        Width="500"
-        Height="400"
+        Width="520"
+        Height="540"
         WindowStartupLocation="CenterOwner"
         Background="#202020">
 
@@ -14,56 +15,137 @@
 
     <Grid RowDefinitions="*,Auto"
           Margin="24">
-        <!-- Settings content -->
-        <StackPanel Grid.Row="0"
-                    Spacing="16">
-            <TextBlock Text="Settings"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Foreground="White" />
-
-            <!-- Theme -->
-            <StackPanel Spacing="8">
-                <TextBlock Text="Theme:"
+        <ScrollViewer Grid.Row="0">
+            <StackPanel Spacing="16">
+                <TextBlock Text="Settings"
+                           FontSize="20"
+                           FontWeight="Bold"
                            Foreground="White" />
-                <ComboBox SelectedIndex="{Binding SelectedThemeIndex}"
-                          Background="#101010"
-                          Foreground="White"
-                          HorizontalAlignment="Stretch">
-                    <ComboBoxItem>Dark</ComboBoxItem>
-                    <ComboBoxItem>Light</ComboBoxItem>
-                </ComboBox>
-            </StackPanel>
 
-            <!-- Native Titlebar -->
-            <CheckBox IsChecked="{Binding UseNativeTitleBar}"
-                      Foreground="White">
-                Use native titlebar
-            </CheckBox>
+                <!-- Theme -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Theme:"
+                               Foreground="White" />
+                    <ComboBox SelectedIndex="{Binding SelectedThemeIndex}"
+                              Background="#101010"
+                              Foreground="White"
+                              HorizontalAlignment="Stretch">
+                        <ComboBoxItem>Dark</ComboBoxItem>
+                        <ComboBoxItem>Light</ComboBoxItem>
+                        <ComboBoxItem>Catppuccin Mocha</ComboBoxItem>
+                        <ComboBoxItem>Catppuccin Latte</ComboBoxItem>
+                        <ComboBoxItem>Solarized Dark</ComboBoxItem>
+                        <ComboBoxItem>Solarized Light</ComboBoxItem>
+                        <ComboBoxItem>VS Code Dark</ComboBoxItem>
+                        <ComboBoxItem>GNOME</ComboBoxItem>
+                        <ComboBoxItem>Breeze Dark</ComboBoxItem>
+                        <ComboBoxItem>Breeze Light</ComboBoxItem>
+                        <ComboBoxItem>Liquid Glass</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
 
-            <!-- Max Results -->
-            <StackPanel Spacing="8">
-                <TextBlock Text="Max search results:"
-                           Foreground="White" />
-                <TextBox Text="{Binding MaxResults}"
-                        Background="#101010"
-                        Foreground="White"
-                        BorderBrush="#404040" />
-            </StackPanel>
+                <!-- Max Results -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Max search results:"
+                               Foreground="White" />
+                    <TextBox Text="{Binding MaxResults}"
+                            Background="#101010"
+                            Foreground="White"
+                            BorderBrush="#404040" />
+                </StackPanel>
 
-            <!-- Language -->
-            <StackPanel Spacing="8">
-                <TextBlock Text="Language:"
-                           Foreground="White" />
-                <ComboBox SelectedIndex="{Binding SelectedLanguageIndex}"
-                          Background="#101010"
-                          Foreground="White"
-                          HorizontalAlignment="Stretch">
-                    <ComboBoxItem>English</ComboBoxItem>
-                    <ComboBoxItem>Русский</ComboBoxItem>
-                </ComboBox>
+                <!-- Language -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Language:"
+                               Foreground="White" />
+                    <ComboBox SelectedIndex="{Binding SelectedLanguageIndex}"
+                              Background="#101010"
+                              Foreground="White"
+                              HorizontalAlignment="Stretch">
+                        <ComboBoxItem>English</ComboBoxItem>
+                        <ComboBoxItem>Русский</ComboBoxItem>
+                        <ComboBoxItem>Deutsch</ComboBoxItem>
+                        <ComboBoxItem>Français</ComboBoxItem>
+                        <ComboBoxItem>Español</ComboBoxItem>
+                        <ComboBoxItem>中文</ComboBoxItem>
+                        <ComboBoxItem>日本語</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Indexer -->
+                <StackPanel Spacing="8"
+                            IsVisible="{Binding ShowIndexerSection}">
+                    <TextBlock Text="{Binding IndexerLabel}"
+                               Foreground="White"
+                               FontWeight="Bold" />
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{Binding IndexerStatusLabel}"
+                                   Foreground="#888888"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding IndexerStatusText}"
+                                   Foreground="#AAFFFFFF"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center" />
+
+                        <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                  IsChecked="{Binding EnableIndexer}"
+                                  Content="{Binding EnableIndexerLabel}"
+                                  Foreground="White"
+                                  Margin="0,4,0,0" />
+
+                        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                  IsChecked="{Binding IndexerAutoStart}"
+                                  Content="{Binding IndexerAutoStartLabel}"
+                                  Foreground="White"
+                                  Margin="0,4,0,0" />
+                    </Grid>
+                </StackPanel>
+
+                <Separator Height="1" Margin="0" Opacity="0.3" IsVisible="{Binding ShowIndexerSection}" />
+
+                <!-- Plugins -->
+                <StackPanel Spacing="8"
+                            IsVisible="{Binding HasPlugins}">
+                    <TextBlock Text="Plugins:"
+                               Foreground="White"
+                               FontWeight="Bold" />
+                    <ItemsControl ItemsSource="{Binding Plugins}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PluginEntryViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding IsEnabled}"
+                                              VerticalAlignment="Center" />
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="White"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Text="{Binding Description}"
+                                                   Foreground="#888888"
+                                                   FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding Version}"
+                                               Foreground="#666666"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- About button -->
+                <Button Content="About Anything"
+                        Background="Transparent"
+                        Foreground="#888888"
+                        BorderBrush="#444444"
+                        Click="About_Click"
+                        HorizontalAlignment="Left"
+                        Padding="16,8" />
             </StackPanel>
-        </StackPanel>
+        </ScrollViewer>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="1"
@@ -85,5 +167,4 @@
                     Padding="16,8" />
         </StackPanel>
     </Grid>
-
 </Window>

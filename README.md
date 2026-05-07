@@ -1,4 +1,4 @@
-# ![icon](https://github.com/RandomSoftMakers/Anything/blob/main/icon.png) Anything
+# ![icon](https://github.com/AnythingDevelopmentTeam/Anything/blob/main/icon.png) Anything
 
 Lightning-fast local file search for Windows, Linux, and macOS.  
 Minimalist interface, instant results, open source.
@@ -10,22 +10,20 @@ Minimalist interface, instant results, open source.
 
 ---
 ## Why?
-- I thing everyone knows about Everything on Windows. One of the best search apps, but it not open source.
-- And i decided to create cross platform Everything copy.
-- Currently Anything already can beat Everything on SSDs, but that's not all. In future we will add Plugins, index, more launguages and settings.
-- That's all. I hope you enjoy using my program!
+- Everything on Windows is great, but it's not open source and not cross-platform.
+- Anything is a free, open-source, cross-platform alternative.
 ---
 ## Features
 
 - **Fast name search** (no index required)
-- **Dark and Light themes** with runtime switching
-- **Smart result filtering**
-- **Clean MVVM architecture**
-- **Cross-platform UI** (Avalonia for all platforms, WPF for Windows)
+- **10 built-in themes** (Dark, Light, Catppuccin, Solarized, VS Code, GNOME, Breeze)
+- **Smart result filtering** (regex, whole word, path, type, size, date)
+- **Plugin system** with dynamic `.dll` loading
+- **Clean MVVM architecture** (Avalonia UI)
 - **First-run experience** with setup wizard
 - **Settings system** with persistent configuration
-- **Native or custom titlebar** support
 - **Multiple package formats** (DEB, RPM, MSI)
+- **Cross-platform CLI** with unified argument parsing
 - **Easy to extend and modify**
 
 ---
@@ -34,11 +32,11 @@ Minimalist interface, instant results, open source.
 
 **Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RandomSoftMakers/Anything/main/setup-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AnythingDevelopmentTeam/Anything/main/setup-linux.sh | bash
 ```
 
 **Windows:**
-Download and run the MSI installer from [Releases](https://github.com/RandomSoftMakers/Anything/releases).
+Download and run the MSI installer from [Releases](https://github.com/AnythingDevelopmentTeam/Anything/releases).
 
 See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
@@ -69,8 +67,8 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 ## Screenshots
 
-![Dark Theme](https://github.com/RandomSoftMakers/Anything/blob/main/ScreenShot_Dark)
-![Light Theme](https://github.com/RandomSoftMakers/Anything/blob/main/Screenshot_Light)
+![Dark Theme](https://github.com/AnythingDevelopmentTeam/Anything/blob/main/ScreenShot_Dark)
+![Light Theme](https://github.com/AnythingDevelopmentTeam/Anything/blob/main/Screenshot_Light)
 
 ---
 
@@ -78,7 +76,6 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 - .NET 10.0
 - Avalonia UI 11.2
-- WPF (Windows-only)
 - C# 12
 
 ---
@@ -86,7 +83,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 ## Building from Source
 
 ```bash
-git clone https://github.com/RandomSoftMakers/anything.git
+git clone https://github.com/AnythingDevelopmentTeam/anything.git
 cd anything
 ./build.sh  # or build.ps1 on Windows
 ```
@@ -96,9 +93,9 @@ cd anything
 dotnet run --project Anything.UI.Avalonia/Anything.UI.Avalonia.csproj
 ```
 
-### Running WPF (Windows only)
+### Running Android
 ```bash
-dotnet run --project Anything.UI.Wpf/Anything.UI.Wpf.csproj
+dotnet publish Anything.UI.Avalonia.Android/Anything.UI.Avalonia.Android.csproj -c Release -r android-arm64 -o dist/android
 ```
 
 ---
@@ -106,8 +103,7 @@ dotnet run --project Anything.UI.Wpf/Anything.UI.Wpf.csproj
 ## First Run
 
 On first launch, Anything shows a setup wizard to configure:
-- Theme (Dark/Light)
-- Titlebar preference (Native/Custom)
+- Theme
 - Language
 
 Access settings anytime by clicking the gear icon () in the titlebar.
@@ -121,7 +117,7 @@ Access settings anytime by clicking the gear icon () in the titlebar.
 - **MSI** (Windows): `Anything-Setup.msi`
 - **Portable**: Single-file executables for Windows, Linux, and macOS
 
-See [GitHub Releases](https://github.com/RandomSoftMakers/Anything/releases) for all downloads.
+See [GitHub Releases](https://github.com/AnythingDevelopmentTeam/Anything/releases) for all downloads.
 
 ---
 

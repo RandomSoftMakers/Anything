@@ -50,6 +50,10 @@ dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj `
     -p:PublishSingleFile=true `
     -o ./dist/win-x64
 
+# Copy icon files to build output
+Copy-Item -Path "./icon.png" -Destination "./dist/win-x64/" -Force -ErrorAction SilentlyContinue
+Copy-Item -Path "./icon.ico" -Destination "./dist/win-x64/" -Force -ErrorAction SilentlyContinue
+
 # Create installer using WiX if available
 $wixAvailable = Get-Command candle.exe -ErrorAction SilentlyContinue
 

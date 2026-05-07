@@ -26,6 +26,8 @@ case $OS in
             --self-contained true \
             -p:PublishSingleFile=true \
             -o dist/linux-x64
+        cp icon.png dist/linux-x64/
+        cp icon.ico dist/linux-x64/
         echo "Linux build complete: dist/linux-x64/Anything.UI.Avalonia"
         ;;
     macos)
@@ -46,6 +48,8 @@ case $OS in
             --self-contained true \
             -p:PublishSingleFile=true \
             -o dist/win-x64
+        cp icon.png dist/win-x64/
+        cp icon.ico dist/win-x64/
         echo "Windows build complete: dist/win-x64/Anything.UI.Avalonia.exe"
         ;;
     *)

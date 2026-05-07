@@ -3,6 +3,7 @@
         xmlns:vm="using:Anything.UI.Avalonia.ViewModels"
         x:Class="Anything.UI.Avalonia.Views.MainWindow"
         Title="Anything"
+        Icon="/Assets/icon.png"
         Width="900"
         Height="500"
         Background="#1A1A1A"
@@ -11,17 +12,17 @@
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
+
     <Grid RowDefinitions="Auto,Auto,*,Auto">
 
-        <!-- Custom title bar (shown when not using native titlebar) -->
+        <!-- Custom title bar -->
         <Border Grid.Row="0"
                 Background="#202020"
                 PointerPressed="TitleBar_PointerPressed"
-                x:Name="CustomTitleBar"
-                IsVisible="False">
+                x:Name="CustomTitleBar">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <TextBlock Grid.Column="0"
-                           Text="Anything"
+                           Text="{Binding SearchWatermark}"
                            VerticalAlignment="Center"
                            Margin="12,0,8,0"
                            Foreground="White"
@@ -34,12 +35,18 @@
                          BorderBrush="#404040"
                          Padding="8"
                          FontSize="14"
-                         Watermark="Search files..."
+                         Watermark="{Binding SearchWatermark}"
                          Text="{Binding Query, Mode=TwoWay}" />
 
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             Spacing="0">
+                    <Button Classes="titleButton"
+                            Content="{Binding FiltersLabel}"
+                            Click="ToggleFilters_Click"
+                            Width="60"
+                            Height="32"
+                            ToolTip.Tip="{Binding FiltersLabel}" />
                     <Button Classes="titleButton"
                             Content="⚙"
                             Click="Settings_Click"
@@ -65,41 +72,101 @@
             </Grid>
         </Border>
 
-        <!-- Main content -->
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
-              Margin="12">
-        <!-- Results info -->
-             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4" Spacing="8">
-                 <TextBlock Text="{Binding Results.Count, StringFormat='Found: {0} results'}"
-                            Foreground="#888888" />
-                 <TextBlock Text="{Binding Query, StringFormat='Query: {0}'}"
-                            Foreground="#888888" />
-             </StackPanel>
+        <!-- Filter panel (collapsible) -->
+        <Border Grid.Row="1"
+                Background="#252525"
+                IsVisible="{Binding ShowFilters}"
+                Padding="8">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding MatchCase}"
+                          Foreground="White"
+                          Content="{Binding MatchCaseLabel}" />
+                <CheckBox IsChecked="{Binding MatchWholeWord}"
+                          Foreground="White"
+                          Content="{Binding WholeWordLabel}" />
+                <CheckBox IsChecked="{Binding MatchPath}"
+                          Foreground="White"
+                          Content="{Binding MatchPathLabel}" />
+                <CheckBox IsChecked="{Binding UseRegex}"
+                          Foreground="White"
+                          Content="{Binding RegexLabel}" />
 
-             <!-- Results list -->
-             <ListBox Grid.Row="1"
-                      ItemsSource="{Binding Results}"
-                      Background="#101010"
-                      Foreground="White"
-                      BorderBrush="#404040"
-                      DoubleTapped="ListBox_DoubleTapped"
-                      Loaded="ListBox_Loaded">
-                 <ListBox.DataTemplates>
-                     <DataTemplate x:DataType="vm:FileEntryViewModel">
-                         <Grid ColumnDefinitions="250,*"
-                               Margin="4">
-                             <TextBlock Grid.Column="0"
-                                        Text="{Binding Name}"
-                                        Foreground="White" />
-                             <TextBlock Grid.Column="1"
-                                        Text="{Binding Path}"
-                                        Foreground="#888888"
-                                        TextTrimming="CharacterEllipsis" />
-                         </Grid>
-                     </DataTemplate>
-                 </ListBox.DataTemplates>
-             </ListBox>
+                <TextBlock Text="{Binding TypeLabel}"
+                           Foreground="#888888"
+                           VerticalAlignment="Center" />
+                <ComboBox SelectedIndex="{Binding TypeFilterIndex}"
+                          Background="#101010"
+                          Foreground="White"
+                          Width="100">
+                    <ComboBoxItem>All</ComboBoxItem>
+                    <ComboBoxItem>Files</ComboBoxItem>
+                    <ComboBoxItem>Folders</ComboBoxItem>
+                </ComboBox>
+
+                <TextBlock Text="{Binding MinSizeLabel}"
+                           Foreground="#888888"
+                           VerticalAlignment="Center" />
+                <TextBox Text="{Binding MinSize}"
+                         Background="#101010"
+                         Foreground="White"
+                         BorderBrush="#404040"
+                         Width="80" />
+
+                <TextBlock Text="{Binding MaxSizeLabel}"
+                           Foreground="#888888"
+                           VerticalAlignment="Center" />
+                <TextBox Text="{Binding MaxSize}"
+                         Background="#101010"
+                         Foreground="White"
+                         BorderBrush="#404040"
+                         Width="80" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main content -->
+        <Grid Grid.Row="2"
+              Margin="12">
+            <Grid RowDefinitions="Auto,*">
+                <!-- Results info -->
+                <TextBlock Grid.Row="0"
+                           Text="{Binding ResultCountText}"
+                           Foreground="#888888"
+                           Margin="0,0,0,4" />
+
+                <!-- Results list -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Results}"
+                         Background="#101010"
+                         Foreground="White"
+                         BorderBrush="#404040"
+                         DoubleTapped="ListBox_DoubleTapped"
+                         Loaded="ListBox_Loaded">
+                    <ListBox.DataTemplates>
+                        <DataTemplate x:DataType="vm:FileEntryViewModel">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                                  Margin="4">
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Icon}"
+                                           Foreground="#888888"
+                                           Margin="0,0,8,0" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           Foreground="White"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,0,8,0" />
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding Path}"
+                                           Foreground="#888888"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,0,8,0" />
+                                <TextBlock Grid.Column="3"
+                                           Text="{Binding SizeText}"
+                                           Foreground="#666666" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.DataTemplates>
+                </ListBox>
+            </Grid>
         </Grid>
     </Grid>
 
@@ -117,6 +184,9 @@
         </Style>
         <Style Selector="Button.titleButton.close:pointerover">
             <Setter Property="Background" Value="#C42B1C" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="White" />
         </Style>
     </Window.Styles>
 

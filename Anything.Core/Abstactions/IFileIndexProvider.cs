@@ -5,5 +5,5 @@ namespace Anything.Core.Abstractions;
 public interface IFileIndexProvider
 {
     Task BuildInitialIndexAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<FileEntry>> SearchAsync(string query, CancellationToken cancellationToken = default);
+    Task<IEnumerable<FileEntry>> SearchAsync(string query, SearchOptions? options = null, CancellationToken cancellationToken = default);
 }

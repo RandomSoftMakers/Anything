@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Lightning fast local file search
 
 License:        GPL-3.0
-URL:            https://github.com/RandomSoftMakers/Anything
+URL:            https://github.com/AnythingDevelopmentTeam/Anything
 Source0:        anything-%{version}.tar.gz
 
 BuildRequires:  dotnet-sdk-10.0

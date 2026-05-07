@@ -1,0 +1,58 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Breeze Light (KDE) - base: #eff0f1, text: #232629 -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="#EFF0F1" />
+    </Style>
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="#232629" />
+    </Style>
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#FCFCFC" />
+        <Setter Property="Foreground" Value="#232629" />
+        <Setter Property="BorderBrush" Value="#BABBBC" />
+        <Setter Property="CaretBrush" Value="#3DAEE9" />
+    </Style>
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="#3DAEE9" />
+    </Style>
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="#FCFCFC" />
+        <Setter Property="Foreground" Value="#232629" />
+        <Setter Property="BorderBrush" Value="#BABBBC" />
+    </Style>
+    <Style Selector="ListBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#232629" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover">
+        <Setter Property="Background" Value="#EDEEEF" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+        <Setter Property="Background" Value="#DCDDDE" />
+    </Style>
+    <Style Selector="ListBoxItem:selected:pointerover">
+        <Setter Property="Background" Value="#CBCCCD" />
+    </Style>
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="#EFF0F1" />
+    </Style>
+    <Style Selector="Thumb">
+        <Setter Property="Background" Value="#ABACAD" />
+    </Style>
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="#FCFCFC" />
+        <Setter Property="Foreground" Value="#232629" />
+        <Setter Property="BorderBrush" Value="#BABBBC" />
+    </Style>
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="#232629" />
+    </Style>
+    <Style Selector="Button">
+        <Setter Property="Background" Value="#FCFCFC" />
+        <Setter Property="Foreground" Value="#232629" />
+        <Setter Property="BorderBrush" Value="#BABBBC" />
+    </Style>
+</Styles>

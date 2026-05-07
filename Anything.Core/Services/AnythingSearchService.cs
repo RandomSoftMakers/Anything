@@ -15,6 +15,6 @@ public sealed class AnythingSearchService
     public Task BuildIndexAsync(CancellationToken cancellationToken = default) =>
         _indexProvider.BuildInitialIndexAsync(cancellationToken);
 
-    public Task<IEnumerable<FileEntry>> SearchAsync(string query, CancellationToken cancellationToken = default) =>
-        _indexProvider.SearchAsync(query, cancellationToken);
+    public Task<IEnumerable<FileEntry>> SearchAsync(string query, SearchOptions? options = null, CancellationToken cancellationToken = default) =>
+        _indexProvider.SearchAsync(query, options, cancellationToken);
 }

@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anything.UI.Avalonia", "Any
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anything.UI.Avalonia.Android", "Anything.UI.Avalonia.Android\Anything.UI.Avalonia.Android.csproj", "{99999999-9999-9999-9999-999999999999}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anything.Indexer.Daemon", "Anything.Indexer.Daemon\Anything.Indexer.Daemon.csproj", "{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}"
+EndProject
 
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,11 +48,6 @@ Global
         {44444444-4444-4444-4444-444444444444}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {44444444-4444-4444-4444-444444444444}.Release|Any CPU.Build.0 = Release|Any CPU
 
-        {55555555-5555-5555-5555-555555555555}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {55555555-5555-5555-5555-555555555555}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {55555555-5555-5555-5555-555555555555}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {55555555-5555-5555-5555-555555555555}.Release|Any CPU.Build.0 = Release|Any CPU
-
         {66666666-6666-6666-6666-666666666666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         {66666666-6666-6666-6666-666666666666}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {66666666-6666-6666-6666-666666666666}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -70,6 +67,11 @@ Global
 
         {99999999-9999-9999-9999-999999999999}.Debug|Any CPU.ActiveCfg = Debug|net10.0-android
         {99999999-9999-9999-9999-999999999999}.Release|Any CPU.ActiveCfg = Release|net10.0-android
+
+        {AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 
     GlobalSection(SolutionProperties) = preSolution

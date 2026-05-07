@@ -1,3 +1,6 @@
+using System.Collections.ObjectModel;
+using System.Linq;
+using Anything.Core.Services;
 using Anything.UI.Avalonia.Settings;
 
 namespace Anything.UI.Avalonia.ViewModels;
@@ -6,8 +9,10 @@ public class SettingsViewModel : ViewModelBase
 {
     private int _selectedThemeIndex;
     private int _selectedLanguageIndex;
-    private bool _useNativeTitleBar;
     private string _maxResults = "500";
+    private bool _enableIndexer;
+    private bool _indexerAutoStart;
+    private bool _isIndexerRunning;
 
     public int SelectedThemeIndex
     {
@@ -21,38 +26,106 @@ public class SettingsViewModel : ViewModelBase
         set => SetProperty(ref _selectedLanguageIndex, value);
     }
 
-    public bool UseNativeTitleBar
-    {
-        get => _useNativeTitleBar;
-        set => SetProperty(ref _useNativeTitleBar, value);
-    }
-
     public string MaxResults
     {
         get => _maxResults;
         set => SetProperty(ref _maxResults, value);
     }
 
+    public bool EnableIndexer
+    {
+        get => _enableIndexer;
+        set => SetProperty(ref _enableIndexer, value);
+    }
+
+    public bool IndexerAutoStart
+    {
+        get => _indexerAutoStart;
+        set => SetProperty(ref _indexerAutoStart, value);
+    }
+
+    public bool IsIndexerRunning
+    {
+        get => _isIndexerRunning;
+        set
+        {
+            if (SetProperty(ref _isIndexerRunning, value))
+                OnPropertyChanged(nameof(IndexerStatusText));
+        }
+    }
+
+    public ObservableCollection<PluginEntryViewModel> Plugins { get; } = new();
+    public bool HasPlugins => Plugins.Count > 0;
+    public bool ShowIndexerSection =>
+#if NO_INDEXER_DAEMON
+        false;
+#else
+        true;
+#endif
+
+    public string IndexerLabel => Lang.T("Indexer");
+    public string IndexerStatusLabel => Lang.T("IndexerStatus");
+    public string IndexerStatusText => IsIndexerRunning ? Lang.T("IndexerRunning") : Lang.T("IndexerStopped");
+    public string EnableIndexerLabel => Lang.T("EnableIndexer");
+    public string IndexerAutoStartLabel => Lang.T("IndexerAutoStart");
+
     public SettingsViewModel()
     {
         var settings = SettingsManager.Current;
-        _selectedThemeIndex = settings.Theme == "Light" ? 1 : 0;
-        _selectedLanguageIndex = settings.Language == "ru-RU" ? 1 : 0;
-        _useNativeTitleBar = settings.UseNativeTitleBar;
+        _selectedThemeIndex = AppSettings.ThemeIndex(settings.Theme);
+        _selectedLanguageIndex = AppSettings.LanguageIndex(settings.Language);
         _maxResults = settings.MaxResults.ToString();
+        _enableIndexer = settings.EnableIndexer;
+        _indexerAutoStart = settings.IndexerAutoStart;
+
+        LoadPlugins();
+        CheckIndexerStatus();
+    }
+
+    private void LoadPlugins()
+    {
+        var pm = TryGetPluginManager();
+        if (pm == null) return;
+
+        Plugins.Clear();
+        foreach (var plugin in pm.Plugins)
+            Plugins.Add(new PluginEntryViewModel(plugin));
+
+        OnPropertyChanged(nameof(HasPlugins));
+    }
+
+    private static PluginManager? TryGetPluginManager()
+    {
+        if (App.Current is App app && app.PluginManager != null)
+            return app.PluginManager;
+        return null;
+    }
+
+    private void CheckIndexerStatus()
+    {
+#if !NO_INDEXER_DAEMON
+        try
+        {
+            var client = new Anything.Indexer.Daemon.IndexerClient();
+            IsIndexerRunning = client.PingAsync().GetAwaiter().GetResult();
+        }
+        catch
+        {
+            IsIndexerRunning = false;
+        }
+#endif
     }
 
     public void Save()
     {
         var settings = SettingsManager.Current;
-        settings.Theme = SelectedThemeIndex == 0 ? "Dark" : "Light";
-        settings.Language = SelectedLanguageIndex == 0 ? "en-US" : "ru-RU";
-        settings.UseNativeTitleBar = UseNativeTitleBar;
+        settings.Theme = AppSettings.ThemeName(SelectedThemeIndex);
+        settings.Language = AppSettings.LanguageCode(SelectedLanguageIndex);
+        settings.EnableIndexer = EnableIndexer;
+        settings.IndexerAutoStart = IndexerAutoStart;
 
         if (int.TryParse(MaxResults, out int maxResults))
-        {
             settings.MaxResults = maxResults;
-        }
 
         SettingsManager.Save();
         App.ApplyTheme(settings.Theme);

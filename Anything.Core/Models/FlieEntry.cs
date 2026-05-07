@@ -6,4 +6,6 @@ public sealed class FileEntry
     public required string Name { get; init; }
     public long Size { get; init; }
     public DateTime LastModifiedUtc { get; init; }
+    public bool IsDirectory { get; init; }
+    public string Extension => System.IO.Path.GetExtension(Name);
 }

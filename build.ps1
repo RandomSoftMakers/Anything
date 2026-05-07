@@ -15,6 +15,16 @@ dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj `
 
 Write-Output "Windows build complete: dist/win-x64/Anything.UI.Avalonia.exe"
 
+# Build indexer daemon for Windows
+dotnet publish Anything.Indexer.Daemon/Anything.Indexer.Daemon.csproj `
+    -c Release `
+    -r win-x64 `
+    --self-contained true `
+    -p:PublishSingleFile=true `
+    -o dist/win-x64
+
+Write-Output "Indexer daemon build complete: dist/win-x64/anything-indexer.exe"
+
 # Optionally build installer
 if (Get-Command candle.exe -ErrorAction SilentlyContinue) {
     Write-Output "Building MSI installer..."

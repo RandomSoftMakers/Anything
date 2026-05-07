@@ -6,7 +6,6 @@ public class FirstRunViewModel : ViewModelBase
 {
     private int _selectedThemeIndex = 0;
     private int _selectedLanguageIndex = 0;
-    private bool _useNativeTitleBar = false;
 
     public int SelectedThemeIndex
     {
@@ -20,22 +19,14 @@ public class FirstRunViewModel : ViewModelBase
         set => SetProperty(ref _selectedLanguageIndex, value);
     }
 
-    public bool UseNativeTitleBar
-    {
-        get => _useNativeTitleBar;
-        set => SetProperty(ref _useNativeTitleBar, value);
-    }
-
     public void CompleteSetup()
     {
         var settings = SettingsManager.Current;
         settings.IsFirstRun = false;
-        settings.Theme = SelectedThemeIndex == 0 ? "Dark" : "Light";
-        settings.Language = SelectedLanguageIndex == 0 ? "en-US" : "ru-RU";
-        settings.UseNativeTitleBar = UseNativeTitleBar;
+        settings.Theme = AppSettings.ThemeName(SelectedThemeIndex);
+        settings.Language = AppSettings.LanguageCode(SelectedLanguageIndex);
         SettingsManager.Save();
 
-        // Apply theme immediately
         App.ApplyTheme(settings.Theme);
     }
 
