@@ -47,7 +47,7 @@ jobs:
         Section: utils
         Priority: optional
         Architecture: amd64
-        Maintainer: RandomSoftMakers
+        Maintainer: AnythingDevelopmentTeam
         Description: Lightning fast local file search" > packaging/deb/anything/DEBIAN/control
         cp icon.png packaging/deb/anything/usr/share/icons/anything.png 2>/dev/null || true
         dpkg-deb --build packaging/deb/anything anything.deb || echo "DEB creation skipped"
@@ -272,15 +272,16 @@ jobs:
 
     - name: Build Flatpak
       run: |
-        FLATPAK_ID="io.github.vesno4null.anything"
+        OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+        FLATPAK_ID="io.github.${OWNER}.anything"
         BUILD_DIR="dist/flatpak-build"
         EXPORT_DIR="dist/flatpak-export"
         APP_DIR="$BUILD_DIR/files"
 
         flatpak build-init \
           "$BUILD_DIR" "$FLATPAK_ID" \
-           org.freedesktop.Platform//24.08 \
-           org.freedesktop.Sdk//24.08
+          org.freedesktop.Platform//24.08 \
+          org.freedesktop.Sdk//24.08
 
         mkdir -p "$APP_DIR/bin"
         mkdir -p "$APP_DIR/share/applications"
@@ -303,8 +304,25 @@ jobs:
         Categories=Utility;Search;
         DESKTOP_EOF
 
-        cp packaging/flatpak/$FLATPAK_ID.metainfo.xml \
-           "$APP_DIR/share/metainfo/$FLATPAK_ID.metainfo.xml"
+        cat > "$APP_DIR/share/metainfo/$FLATPAK_ID.metainfo.xml" << METAINFO_EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <component type="desktop-application">
+          <id>$FLATPAK_ID</id>
+          <metadata_license>CC0-1.0</metadata_license>
+          <project_license>GPL-3.0</project_license>
+          <name>Anything</name>
+          <summary>Lightning fast local file search tool</summary>
+          <description>
+            <p>A cross-platform file search tool with instant results.</p>
+          </description>
+          <categories>
+            <category>Utility</category>
+          </categories>
+          <url type="homepage">https://github.com/${{ github.repository }}</url>
+          <content_rating type="oars-1.1" />
+          <launchable type="desktop-id">$FLATPAK_ID.desktop</launchable>
+        </component>
+        METAINFO_EOF
 
         flatpak build-finish "$BUILD_DIR" \
           --socket=x11 \
@@ -410,6 +428,6 @@ jobs:
           - **Windows**: `Anything.UI.Avalonia.exe` (64-bit) or `Anything-Setup.msi`
 
           ### Installation
-          See [INSTALL.md](https://github.com/RandomSoftMakers/Anything/blob/main/INSTALL.md) for details.
+          See [INSTALL.md](https://github.com/AnythingDevelopmentTeam/Anything/blob/main/INSTALL.md) for details.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
