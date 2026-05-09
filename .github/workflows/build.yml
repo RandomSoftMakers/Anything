@@ -278,7 +278,9 @@ jobs:
         APP_DIR="$BUILD_DIR/files"
 
         flatpak build-init \
-          "$BUILD_DIR" "$FLATPAK_ID"
+          "$BUILD_DIR" "$FLATPAK_ID" \
+           org.freedesktop.Platform//24.08 \
+           org.freedesktop.Sdk//24.08
 
         mkdir -p "$APP_DIR/bin"
         mkdir -p "$APP_DIR/share/applications"
