@@ -293,15 +293,15 @@ jobs:
         cp icon.png "$APP_DIR/share/icons/hicolor/256x256/apps/$FLATPAK_ID.png"
 
         cat > "$APP_DIR/share/applications/$FLATPAK_ID.desktop" << DESKTOP_EOF
-[Desktop Entry]
-Name=Anything
-Comment=Lightning fast local file search
-Exec=/app/bin/anything
-Icon=$FLATPAK_ID
-Terminal=false
-Type=Application
-Categories=Utility;Search;
-DESKTOP_EOF
+        [Desktop Entry]
+        Name=Anything
+        Comment=Lightning fast local file search
+        Exec=/app/bin/anything
+        Icon=$FLATPAK_ID
+        Terminal=false
+        Type=Application
+        Categories=Utility;Search;
+        DESKTOP_EOF
 
         cp packaging/flatpak/$FLATPAK_ID.metainfo.xml \
            "$APP_DIR/share/metainfo/$FLATPAK_ID.metainfo.xml"
