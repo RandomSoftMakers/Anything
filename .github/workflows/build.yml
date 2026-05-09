@@ -278,7 +278,6 @@ jobs:
         APP_DIR="$BUILD_DIR/files"
 
         flatpak build-init \
-          --sdk=org.freedesktop.Sdk//24.08 \
           "$BUILD_DIR" "$FLATPAK_ID"
 
         mkdir -p "$APP_DIR/bin"
@@ -294,7 +293,7 @@ jobs:
         cat > "$APP_DIR/share/applications/$FLATPAK_ID.desktop" << DESKTOP_EOF
         [Desktop Entry]
         Name=Anything
-        Comment=Lightning fast local file search
+        Comment=Local file search
         Exec=/app/bin/anything
         Icon=$FLATPAK_ID
         Terminal=false
