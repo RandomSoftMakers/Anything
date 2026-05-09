@@ -29,13 +29,46 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [/home/vesno/Anything/Anything.UI.Avalonia/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/BreezeDark.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/BreezeLight.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/CatppuccinLatte.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/CatppuccinMocha.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/home/vesno/Anything/Anything.UI.Avalonia/Themes/Dark.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/GNOME.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [/home/vesno/Anything/Anything.UI.Avalonia/Themes/Light.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/LiquidGlass.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/SolarizedDark.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/SolarizedLight.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Themes/VSCodeDark.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Views/AboutWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/home/vesno/Anything/Anything.UI.Avalonia/Views/FirstRunWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/home/vesno/Anything/Anything.UI.Avalonia/Views/MainView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [/home/vesno/Anything/Anything.UI.Avalonia/Views/SettingsWindow.axaml]

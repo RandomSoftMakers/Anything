@@ -19,7 +19,7 @@ public partial class MainWindow : Window
 
     private void SetGlassBackground()
     {
-        var theme = Settings.SettingsManager.Current.Theme;
+        var theme = App.ResolveTheme(Settings.SettingsManager.Current.Theme);
         if (theme == "LiquidGlass")
         {
             Background = new SolidColorBrush(Color.Parse("#1A0A1E"));

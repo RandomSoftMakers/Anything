@@ -79,7 +79,7 @@ public class SettingsViewModel : ViewModelBase
         _indexerAutoStart = settings.IndexerAutoStart;
 
         LoadPlugins();
-        CheckIndexerStatus();
+        _ = CheckIndexerStatusAsync();
     }
 
     private void LoadPlugins()
@@ -101,13 +101,13 @@ public class SettingsViewModel : ViewModelBase
         return null;
     }
 
-    private void CheckIndexerStatus()
+    private async Task CheckIndexerStatusAsync()
     {
 #if !NO_INDEXER_DAEMON
         try
         {
             var client = new Anything.Indexer.Daemon.IndexerClient();
-            IsIndexerRunning = client.PingAsync().GetAwaiter().GetResult();
+            IsIndexerRunning = await client.PingAsync();
         }
         catch
         {

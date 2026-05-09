@@ -30,6 +30,7 @@
                               Background="#101010"
                               Foreground="White"
                               HorizontalAlignment="Stretch">
+                        <ComboBoxItem>System</ComboBoxItem>
                         <ComboBoxItem>Dark</ComboBoxItem>
                         <ComboBoxItem>Light</ComboBoxItem>
                         <ComboBoxItem>Catppuccin Mocha</ComboBoxItem>

@@ -130,7 +130,7 @@ public partial class App : Application
 
     public static readonly string[] ThemeNames =
     [
-        "Dark", "Light",
+        "System", "Dark", "Light",
         "CatppuccinMocha", "CatppuccinLatte",
         "SolarizedDark", "SolarizedLight",
         "VSCodeDark", "GNOME",
@@ -144,8 +144,17 @@ public partial class App : Application
         _ => false
     };
 
+    public static string ResolveTheme(string themeName)
+    {
+        if (themeName != "System")
+            return themeName;
+
+        return Services.SystemThemeService.IsSystemDarkMode() ? "Dark" : "Light";
+    }
+
     public static void ApplyTheme(string themeName)
     {
+        var resolved = ResolveTheme(themeName);
         var styles = Current?.Styles;
         if (styles != null)
         {
@@ -155,7 +164,7 @@ public partial class App : Application
 
             var newTheme = new StyleInclude(new Uri("avares://Anything.UI.Avalonia/"))
             {
-                Source = new Uri($"avares://Anything.UI.Avalonia/Themes/{themeName}.axaml")
+                Source = new Uri($"avares://Anything.UI.Avalonia/Themes/{resolved}.axaml")
             };
             styles.Add(newTheme);
         }
