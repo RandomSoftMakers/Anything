@@ -33,16 +33,15 @@ jobs:
       run: |
         dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj -c ${{ matrix.configuration }} -r linux-x64 --self-contained true -p:PublishSingleFile=true -o dist/linux-x64
 
-    - name: Create Linux packages
+    - name: Create DEB package
       run: |
-        # Create DEB package
         mkdir -p packaging/deb/anything/usr/bin
         mkdir -p packaging/deb/anything/usr/share/applications
         mkdir -p packaging/deb/anything/usr/share/icons
         cp dist/linux-x64/Anything.UI.Avalonia packaging/deb/anything/usr/bin/anything
         chmod +x packaging/deb/anything/usr/bin/anything
         mkdir -p packaging/deb/anything/DEBIAN
-        cp packaging/deb/control packaging/deb/anything/DEBIAN/ || echo "Create DEBIAN/control file"
+        cp packaging/deb/control packaging/deb/anything/DEBIAN/ || true
         echo "Package: anything
         Version: 1.0.0
         Section: utils
@@ -53,23 +52,24 @@ jobs:
         cp icon.png packaging/deb/anything/usr/share/icons/anything.png 2>/dev/null || true
         dpkg-deb --build packaging/deb/anything anything.deb || echo "DEB creation skipped"
 
-        # Create RPM package
+    - name: Create RPM package
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y rpm
         mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-        echo "Name: anything
-        Version: 1.0.0
-        Release: 1
-        Summary: Lightning fast local file search
-        License: MIT
-        URL: https://github.com/RandomSoftMakers/Anything
-        %description
-        Lightning fast local file search tool
-        %install
-        mkdir -p %{buildroot}/usr/bin
-        cp dist/linux-x64/Anything.UI.Avalonia %{buildroot}/usr/bin/anything
-        chmod +x %{buildroot}/usr/bin/anything
-        %files
-        /usr/bin/anything" > ~/rpmbuild/SPECS/anything.spec
-        rpmbuild -bb ~/rpmbuild/SPECS/anything.spec 2>/dev/null || echo "RPM creation skipped"
+        VERSION="1.0.0"
+        mkdir -p staging/anything-$VERSION
+        cp dist/linux-x64/Anything.UI.Avalonia staging/anything-$VERSION/
+        cp icon.png staging/anything-$VERSION/
+        tar czf ~/rpmbuild/SOURCES/anything-$VERSION.tar.gz -C staging anything-$VERSION
+        cp packaging/rpm/anything.spec ~/rpmbuild/SPECS/
+        rpmbuild -bb ~/rpmbuild/SPECS/anything.spec \
+          --define "_topdir $HOME/rpmbuild" 2>&1
+        RPM_FILE=$(find ~/rpmbuild/RPMS -name "*.rpm" | head -1)
+        if [ -n "$RPM_FILE" ]; then
+          cp "$RPM_FILE" dist/Anything-Linux.rpm
+          echo "RPM created"
+        fi
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
@@ -83,6 +83,14 @@ jobs:
       with:
         name: Anything-Linux-deb
         path: anything.deb
+        if-no-files-found: ignore
+
+    - name: Upload RPM Package
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Anything-Linux-rpm
+        path: dist/Anything-Linux.rpm
         if-no-files-found: ignore
 
   build-macos:
@@ -112,7 +120,6 @@ jobs:
 
     - name: Create macOS DMG
       run: |
-        # Create a simple DMG structure
         mkdir -p dist/dmg
         cp -r dist/osx-x64 dist/dmg/Anything.app
         hdiutil create -volname "Anything" -srcfolder dist/dmg -ov -format UDZO dist/Anything-macOS.dmg || echo "DMG creation skipped"
@@ -167,10 +174,7 @@ jobs:
 
     - name: Create MSI Installer
       run: |
-        # Install WiX Toolset if not present
-        choco install wixtoolset -y 2>$null; if (-not $?) { echo "WiX installation skipped" }
-
-        # Add WiX to PATH - check common installation paths
+        choco install wixtoolset -y 2>$null
         $wixPaths = @(
           "C:\Program Files (x86)\WiX Toolset v3.11\bin",
           "C:\Program Files\WiX Toolset v3.11\bin",
@@ -183,11 +187,8 @@ jobs:
             break
           }
         }
-
-        # Build MSI
         if (Test-Path "packaging/windows/Product.wxs") {
           cd packaging/windows
-          # Fix: pass SourceDir as WiX variable properly
           candle.exe -dSourceDir="..\..\dist\win-x64" Product.wxs
           light.exe -out "..\..\dist\Anything-Setup.msi" Product.wixobj
           cd ..\..
@@ -240,8 +241,95 @@ jobs:
         name: Anything-Android
         path: dist/android/
 
+  build-flatpak:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore Anything.sln
+
+    - name: Publish Avalonia (Linux)
+      run: |
+        dotnet publish Anything.UI.Avalonia/Anything.UI.Avalonia.csproj \
+          -c Release -r linux-x64 --self-contained true \
+          -p:PublishSingleFile=true \
+          -o dist/flatpak-app
+
+    - name: Setup Flatpak
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y flatpak
+        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        flatpak install -y --noninteractive flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+    - name: Build Flatpak
+      run: |
+        FLATPAK_ID="io.github.randomsoftmakers.anything"
+        BUILD_DIR="dist/flatpak-build"
+        EXPORT_DIR="dist/flatpak-export"
+        APP_DIR="$BUILD_DIR/files"
+
+        flatpak build-init \
+          --runtime=org.freedesktop.Platform//24.08 \
+          --sdk=org.freedesktop.Sdk//24.08 \
+          "$BUILD_DIR" "$FLATPAK_ID"
+
+        mkdir -p "$APP_DIR/bin"
+        mkdir -p "$APP_DIR/share/applications"
+        mkdir -p "$APP_DIR/share/icons/hicolor/256x256/apps"
+        mkdir -p "$APP_DIR/share/metainfo"
+
+        cp dist/flatpak-app/Anything.UI.Avalonia "$APP_DIR/bin/anything"
+        chmod +x "$APP_DIR/bin/anything"
+
+        cp icon.png "$APP_DIR/share/icons/hicolor/256x256/apps/$FLATPAK_ID.png"
+
+        cat > "$APP_DIR/share/applications/$FLATPAK_ID.desktop" << DESKTOP_EOF
+[Desktop Entry]
+Name=Anything
+Comment=Lightning fast local file search
+Exec=/app/bin/anything
+Icon=$FLATPAK_ID
+Terminal=false
+Type=Application
+Categories=Utility;Search;
+DESKTOP_EOF
+
+        cp packaging/flatpak/$FLATPAK_ID.metainfo.xml \
+           "$APP_DIR/share/metainfo/$FLATPAK_ID.metainfo.xml"
+
+        flatpak build-finish "$BUILD_DIR" \
+          --socket=x11 \
+          --socket=wayland \
+          --share=ipc \
+          --filesystem=host \
+          --device=dri \
+          --command=anything
+
+        flatpak build-export \
+          --runtime=org.freedesktop.Platform//24.08 \
+          "$EXPORT_DIR" "$BUILD_DIR"
+
+        flatpak build-bundle \
+          "$EXPORT_DIR" dist/Anything-Linux.flatpak \
+          "$FLATPAK_ID"
+
+    - name: Upload Flatpak Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Anything-Linux-flatpak
+        path: dist/Anything-Linux.flatpak
+
   create-release:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-macos, build-windows, build-flatpak]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
@@ -259,6 +347,20 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: Anything-Linux-deb
+        path: dist/
+      continue-on-error: true
+
+    - name: Download Linux RPM
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-Linux-rpm
+        path: dist/
+      continue-on-error: true
+
+    - name: Download Linux Flatpak
+      uses: actions/download-artifact@v4
+      with:
+        name: Anything-Linux-flatpak
         path: dist/
       continue-on-error: true
 
@@ -298,14 +400,16 @@ jobs:
           dist/Anything-Setup.msi
           dist/Anything-macOS.dmg
           dist/anything.deb
+          dist/Anything-Linux.rpm
+          dist/Anything-Linux.flatpak
         body: |
           ## Anything Release
-          
+
           ### Downloads
-          - **Linux**: `Anything.UI.Avalonia` (64-bit) or `anything.deb`
+          - **Linux**: `Anything.UI.Avalonia` (64-bit) or `anything.deb` or `Anything-Linux.rpm` or `Anything-Linux.flatpak`
           - **macOS**: `Anything.UI.Avalonia` (64-bit) or `Anything-macOS.dmg`
           - **Windows**: `Anything.UI.Avalonia.exe` (64-bit) or `Anything-Setup.msi`
-          
+
           ### Installation
           See [INSTALL.md](https://github.com/RandomSoftMakers/Anything/blob/main/INSTALL.md) for details.
       env:
