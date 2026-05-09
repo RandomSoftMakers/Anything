@@ -272,13 +272,12 @@ jobs:
 
     - name: Build Flatpak
       run: |
-        FLATPAK_ID="io.github.randomsoftmakers.anything"
+        FLATPAK_ID="io.github.vesno4null.anything"
         BUILD_DIR="dist/flatpak-build"
         EXPORT_DIR="dist/flatpak-export"
         APP_DIR="$BUILD_DIR/files"
 
         flatpak build-init \
-          --runtime=org.freedesktop.Platform//24.08 \
           --sdk=org.freedesktop.Sdk//24.08 \
           "$BUILD_DIR" "$FLATPAK_ID"
 
