@@ -315,7 +315,6 @@ jobs:
           --command=anything
 
         flatpak build-export \
-          --runtime=org.freedesktop.Platform//24.08 \
           "$EXPORT_DIR" "$BUILD_DIR"
 
         flatpak build-bundle \
