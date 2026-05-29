@@ -44,7 +44,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Visual Studio dev shell
-        uses: microsoft/setup-msvc@v2
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install Qt via aqtinstall
         run: |
