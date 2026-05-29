@@ -81,16 +81,21 @@ jobs:
         working-directory: SearchEngine
 
       - name: Configure CMake
-        shell: msys2 {0}
         run: |
-          mkdir -p Anything/build && cd Anything/build
-          cmake .. -G "MinGW Makefiles" \
-            -DCMAKE_PREFIX_PATH="C:/Qt/$QT_VERSION/$QT_ARCH" \
-            -DCMAKE_BUILD_TYPE=Release
+          $mingwBin = "C:\msys64\mingw64\bin"
+          mkdir -p Anything/build
+          cd Anything/build
+          cmake .. -G "MinGW Makefiles" `
+            -DCMAKE_PREFIX_PATH="C:/Qt/$env:QT_VERSION/$env:QT_ARCH" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_MAKE_PROGRAM="$mingwBin\mingw32-make.exe" `
+            -DCMAKE_C_COMPILER="$mingwBin\gcc.exe" `
+            -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe"
 
       - name: Build Qt application
-        shell: msys2 {0}
-        run: mingw32-make -j$(nproc)
+        run: |
+          $mingwBin = "C:\msys64\mingw64\bin"
+          & "$mingwBin\mingw32-make.exe" -j${env:NUMBER_OF_PROCESSORS}
         working-directory: Anything/build
 
       - name: Deploy Qt runtime DLLs
