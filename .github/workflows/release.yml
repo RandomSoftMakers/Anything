@@ -56,10 +56,10 @@ jobs:
         run: |
           pip install aqtinstall
           $archs = aqt list-qt windows desktop --arch 6.4.2
-          $qtArch = ($archs | Select-String "mingw" | Select-Object -First 1).ToString().Trim()
-          if (-not $qtArch) { $qtArch = ($archs | Select-Object -First 1).ToString().Trim() }
+          $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "mingw" } | Select-Object -First 1)
+          if (-not $qtArch) { $qtArch = ($archs -split '\s+' | Select-Object -First 1) }
           Write-Host "Selected Qt architecture: $qtArch"
-          aqt install-qt windows desktop 6.4.2 "$qtArch" --outputdir C:\Qt
+          aqt install-qt --base "http://download.qt.io/online/qtsdkrepository/windows_x86/desktop/" windows desktop 6.4.2 "$qtArch" --outputdir C:\Qt
           "QT_ARCH=$qtArch" | Out-File $env:GITHUB_ENV -Append
 
       - name: Cache Rust dependencies
@@ -75,8 +75,8 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir -p Anything/build && cd Anything/build
-          cmake .. -G "MinGW Makefiles" `
-            -DCMAKE_PREFIX_PATH="C:/Qt/$QT_VERSION/$QT_ARCH" `
+          cmake .. -G "MinGW Makefiles" \
+            -DCMAKE_PREFIX_PATH="C:/Qt/$QT_VERSION/$QT_ARCH" \
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Qt application
