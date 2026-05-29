@@ -1,0 +1,192 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    branches: ["legacy", "main", "rewrite"]
+  workflow_dispatch:
+
+env:
+  QT_VERSION: "6.4.2"
+  QT_HOST: "windows"
+  QT_TARGET: "desktop"
+  QT_ARCH: "mingw_64"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # Checkout all three repos as siblings (same layout as local dev)
+      - name: Checkout Anything
+        uses: actions/checkout@v4
+        with:
+          path: Anything
+
+      - name: Checkout SearchEngine
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/SearchEngine.git
+          ref: main
+          path: SearchEngine
+
+      - name: Checkout LibAnything
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/LibAnything.git
+          ref: main
+          path: LibAnything
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup MSYS2 (MinGW + CMake)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+
+      - name: Install Qt via aqtinstall
+        run: |
+          pip install aqtinstall
+          aqt install-qt ${{ env.QT_HOST }} ${{ env.QT_TARGET }} ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --outputdir C:\Qt
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: SearchEngine
+
+      - name: Build Rust (SearchEngine + LibAnything)
+        run: cargo build --release
+        working-directory: SearchEngine
+
+      - name: Configure CMake
+        shell: msys2 {0}
+        run: |
+          mkdir -p Anything/build && cd Anything/build
+          cmake .. -G "MinGW Makefiles" `
+            -DCMAKE_PREFIX_PATH=C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }} `
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Qt application
+        shell: msys2 {0}
+        run: mingw32-make -j$(nproc)
+        working-directory: Anything/build
+
+      - name: Deploy Qt runtime DLLs
+        run: |
+          C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}\bin\windeployqt.exe `
+            --no-compiler-runtime `
+            --no-system-d3d-compiler `
+            Anything/build/AnythingUIQt.exe
+
+      - name: Copy MinGW runtime DLLs
+        run: |
+          $msysRoot = "C:\msys64"
+          $mingwBin = "$msysRoot\mingw64\bin"
+          $stage = "Anything\build"
+          $need = @("libgcc_s_seh-1.dll","libstdc++-6.dll","libwinpthread-1.dll")
+          foreach ($dll in $need) {
+            $src = Join-Path $mingwBin $dll
+            if (Test-Path $src) { Copy-Item $src $stage }
+            else { Write-Warning "Not found: $src" }
+          }
+
+      - name: Copy metadata
+        run: |
+          Copy-Item Anything/LICENSE   Anything/build/
+          Copy-Item Anything/README.md Anything/build/
+
+      - name: Create release archive
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          if (-not $version) { $version = "0.1.0" }
+          $pkgName = "AnythingUIQt-${version}-win64"
+          Rename-Item Anything/build $pkgName
+          Compress-Archive -Path "${pkgName}/*" -DestinationPath "${pkgName}.zip" -Force
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnythingUIQt-windows
+          path: AnythingUIQt-*.zip
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: AnythingUIQt-*.zip
+          generate_release_notes: true
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Anything
+        uses: actions/checkout@v4
+        with:
+          path: Anything
+
+      - name: Checkout SearchEngine
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/SearchEngine.git
+          ref: main
+          path: SearchEngine
+
+      - name: Checkout LibAnything
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/LibAnything.git
+          ref: main
+          path: LibAnything
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Qt6
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qt6-base-dev libgl1-mesa-dev
+
+      - name: Build Rust
+        run: cargo build --release
+        working-directory: SearchEngine
+
+      - name: Configure CMake
+        run: |
+          mkdir -p Anything/build && cd Anything/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Qt application
+        run: make -j$(nproc)
+        working-directory: Anything/build
+
+      - name: Package
+        run: |
+          cd Anything
+          mkdir -p _stage
+          cp build/AnythingUIQt build/searchengine.so _stage/
+          cp LICENSE README.md _stage/
+          cd _stage
+          tar czf "../../AnythingUIQt-${GITHUB_REF_NAME#v}-linux-x64.tar.gz" *
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnythingUIQt-linux
+          path: AnythingUIQt-*-linux-x64.tar.gz
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: AnythingUIQt-*-linux-x64.tar.gz
