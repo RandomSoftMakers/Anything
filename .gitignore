@@ -1,0 +1,24 @@
+# Build output
+build/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Qt
+*.pro.user
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Old C# artifacts (no longer used)
+*.dll
+*.pdb
+*.exe
+*.zip
+bin/
+obj/
+dist/

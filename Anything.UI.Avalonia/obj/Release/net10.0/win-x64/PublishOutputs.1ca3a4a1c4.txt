@@ -1,6 +1,0 @@
-/home/vesno/Anything/dist/win-x64/Anything.UI.Avalonia.pdb
-/home/vesno/Anything/dist/win-x64/av_libglesv2.dll
-/home/vesno/Anything/dist/win-x64/libHarfBuzzSharp.dll
-/home/vesno/Anything/dist/win-x64/libSkiaSharp.dll
-/home/vesno/Anything/dist/win-x64/Anything.Core.pdb
-/home/vesno/Anything/dist/win-x64/Anything.UI.Avalonia.exe
