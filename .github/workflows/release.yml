@@ -10,9 +10,6 @@ on:
 
 env:
   QT_VERSION: "6.4.2"
-  QT_HOST: "windows"
-  QT_TARGET: "desktop"
-  QT_ARCH: "mingw_64"
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -58,7 +55,12 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          aqt install-qt ${{ env.QT_HOST }} ${{ env.QT_TARGET }} ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --outputdir C:\Qt
+          $archs = aqt list-qt windows desktop --arch 6.4.2
+          $qtArch = ($archs | Select-String "mingw" | Select-Object -First 1).ToString().Trim()
+          if (-not $qtArch) { $qtArch = ($archs | Select-Object -First 1).ToString().Trim() }
+          Write-Host "Selected Qt architecture: $qtArch"
+          aqt install-qt windows desktop 6.4.2 "$qtArch" --outputdir C:\Qt
+          "QT_ARCH=$qtArch" | Out-File $env:GITHUB_ENV -Append
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -74,7 +76,7 @@ jobs:
         run: |
           mkdir -p Anything/build && cd Anything/build
           cmake .. -G "MinGW Makefiles" `
-            -DCMAKE_PREFIX_PATH=C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }} `
+            -DCMAKE_PREFIX_PATH="C:/Qt/$QT_VERSION/$QT_ARCH" `
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Qt application
@@ -84,7 +86,8 @@ jobs:
 
       - name: Deploy Qt runtime DLLs
         run: |
-          C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}\bin\windeployqt.exe `
+          $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          & "$qtDir\bin\windeployqt.exe" `
             --no-compiler-runtime `
             --no-system-d3d-compiler `
             Anything/build/AnythingUIQt.exe
