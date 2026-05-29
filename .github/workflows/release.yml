@@ -55,11 +55,12 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          $versions = aqt list-qt windows desktop
-          $best = $versions | Select-String '^6\.' | ForEach-Object { $_.ToString().Trim() } | Sort-Object -Descending
+          $versions = (aqt list-qt windows desktop) -split '\s+'
+          $best = $versions | Where-Object { $_ -match '^6\.' } | Sort-Object -Descending
           $qtVer = $null; $qtArch = $null
           foreach ($v in $best) {
-            $archs = aqt list-qt windows desktop --arch $v
+            $archs = aqt list-qt windows desktop --arch $v 2>&1
+            if ($LASTEXITCODE -ne 0) { continue }
             $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "mingw" } | Select-Object -First 1)
             if ($qtArch) { $qtVer = $v; break }
           }
