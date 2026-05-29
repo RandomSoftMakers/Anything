@@ -80,22 +80,29 @@ jobs:
         run: cargo build --release
         working-directory: SearchEngine
 
+      - name: Locate MinGW tools
+        run: |
+          $msysRoot = if (Test-Path "C:\msys64") { "C:\msys64" } else { Get-ChildItem "C:\" -Directory | Where-Object Name -like "msys*" | Select-Object -First 1 -ExpandProperty FullName }
+          $mingwBin = if (Test-Path "$msysRoot\mingw64\bin\g++.exe") { "$msysRoot\mingw64\bin" } else { "$msysRoot\ucrt64\bin" }
+          Write-Host "MSYS2 root: $msysRoot"
+          Write-Host "MinGW bin:  $mingwBin"
+          "MINGW_BIN=$mingwBin" | Out-File $env:GITHUB_ENV -Append
+          Get-ChildItem "$mingwBin\g++*" -Name
+
       - name: Configure CMake
         run: |
-          $mingwBin = "C:\msys64\mingw64\bin"
           mkdir -p Anything/build
           cd Anything/build
           cmake .. -G "MinGW Makefiles" `
             -DCMAKE_PREFIX_PATH="C:/Qt/$env:QT_VERSION/$env:QT_ARCH" `
             -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_MAKE_PROGRAM="$mingwBin\mingw32-make.exe" `
-            -DCMAKE_C_COMPILER="$mingwBin\gcc.exe" `
-            -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe"
+            -DCMAKE_MAKE_PROGRAM="$env:MINGW_BIN\mingw32-make.exe" `
+            -DCMAKE_C_COMPILER="$env:MINGW_BIN\gcc.exe" `
+            -DCMAKE_CXX_COMPILER="$env:MINGW_BIN\g++.exe"
 
       - name: Build Qt application
         run: |
-          $mingwBin = "C:\msys64\mingw64\bin"
-          & "$mingwBin\mingw32-make.exe" -j${env:NUMBER_OF_PROCESSORS}
+          & "$env:MINGW_BIN\mingw32-make.exe" -j${env:NUMBER_OF_PROCESSORS}
         working-directory: Anything/build
 
       - name: Deploy Qt runtime DLLs
