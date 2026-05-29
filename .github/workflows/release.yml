@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  QT_VERSION: "6.4.2"
+  QT_VERSION: "6.11"
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -55,12 +55,12 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          $archs = aqt list-qt windows desktop --arch 6.4.2
-          $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "mingw" } | Select-Object -First 1)
-          if (-not $qtArch) { $qtArch = ($archs -split '\s+' | Select-Object -First 1) }
-          Write-Host "Selected Qt architecture: $qtArch"
-          aqt install-qt --base "http://download.qt.io/online/qtsdkrepository/windows_x86/desktop/" windows desktop 6.4.2 "$qtArch" --outputdir C:\Qt
-          "QT_ARCH=$qtArch" | Out-File $env:GITHUB_ENV -Append
+          aqt install-qt windows desktop 6.11 win64_mingw --outputdir C:\Qt
+          $qtDir = Get-ChildItem "C:\Qt\6.11*" -Directory | Select-Object -First 1
+          $env:QT_VERSION = $qtDir.Name
+          "QT_VERSION=$($qtDir.Name)" | Out-File $env:GITHUB_ENV -Append
+          "QT_ARCH=win64_mingw" | Out-File $env:GITHUB_ENV -Append
+          Write-Host "Qt installed at: C:\Qt\$($qtDir.Name)\win64_mingw"
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
