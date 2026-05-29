@@ -1,4 +1,5 @@
-# ![icon](https://github.com/AnythingDevelopmentTeam/Anything/blob/main/icon.png) Anything
+# This branch of Anything is deprecated and will be removed soon. 
+# ![icon](https://github.com/AnythingDevelopmentTeam/Anything/blob/legacy/icon.png) Anything
 
 Lightning-fast local file search for Windows, Linux, and macOS.  
 Minimalist interface, instant results, open source.
