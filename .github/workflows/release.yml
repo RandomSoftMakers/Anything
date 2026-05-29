@@ -55,12 +55,20 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          aqt install-qt windows desktop 6.11 win64_mingw --outputdir C:\Qt
-          $qtDir = Get-ChildItem "C:\Qt\6.11*" -Directory | Select-Object -First 1
-          $env:QT_VERSION = $qtDir.Name
-          "QT_VERSION=$($qtDir.Name)" | Out-File $env:GITHUB_ENV -Append
-          "QT_ARCH=win64_mingw" | Out-File $env:GITHUB_ENV -Append
-          Write-Host "Qt installed at: C:\Qt\$($qtDir.Name)\win64_mingw"
+          $versions = aqt list-qt windows desktop
+          $best = $versions | Select-String '^6\.' | ForEach-Object { $_.ToString().Trim() } | Sort-Object -Descending
+          $qtVer = $null; $qtArch = $null
+          foreach ($v in $best) {
+            $archs = aqt list-qt windows desktop --arch $v
+            $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "mingw" } | Select-Object -First 1)
+            if ($qtArch) { $qtVer = $v; break }
+          }
+          if (-not $qtVer) { throw "No Qt version with MinGW found!" }
+          Write-Host "Installing Qt $qtVer ($qtArch)..."
+          aqt install-qt windows desktop $qtVer $qtArch --outputdir C:\Qt
+          "QT_VERSION=$qtVer" | Out-File $env:GITHUB_ENV -Append
+          "QT_ARCH=$qtArch" | Out-File $env:GITHUB_ENV -Append
+          Write-Host "Qt installed at: C:\Qt\$qtVer\$qtArch"
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
