@@ -268,10 +268,9 @@ void MainWindow::onAbout() {
     about.setText(
         "<h2>Anything</h2>"
         "<p>Быстрый поиск файлов</p>"
-        "<p><b>Версия:</b> 1.0.0<br>"
+        "<p><b>Версия:</b> 2.0<br>"
         "<b>Движок:</b> Rust (LibAnything + SearchEngine)<br>"
         "<b>GUI:</b> Qt 6 + MinGW<br>"
-        "<b>Платформа:</b> Windows 10/11</p>"
         "<p>Архитектура: LibAnything (сканирование ФС)<br>"
         "→ SearchEngine (нечёткий поиск + FFI)<br>"
         "→ GUI (Qt 6)</p>"
@@ -281,7 +280,7 @@ void MainWindow::onAbout() {
         "&nbsp;&nbsp;ext:pdf — только PDF<br>"
         "&nbsp;&nbsp;ext:!tmp — кроме TMP<br>"
         "&nbsp;&nbsp;path:C:\\Docs — путь</p>"
-        "<p style='color: gray; font-size: 11px;'>© 2026 Anything Team. MIT License.</p>"
+        "<p style='color: gray; font-size: 11px;'>© 2026 Anything Team. GPL V3 License.</p>"
     );
     about.exec();
 }
