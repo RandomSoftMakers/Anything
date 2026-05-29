@@ -43,14 +43,8 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Setup MSYS2 (MinGW + CMake)
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
+      - name: Setup Visual Studio dev shell
+        uses: microsoft/setup-msvc@v2
 
       - name: Install Qt via aqtinstall
         run: |
@@ -61,10 +55,10 @@ jobs:
           foreach ($v in $best) {
             $archs = aqt list-qt windows desktop --arch $v 2>&1
             if ($LASTEXITCODE -ne 0) { continue }
-            $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "mingw" } | Select-Object -First 1)
+            $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "msvc" } | Select-Object -First 1)
             if ($qtArch) { $qtVer = $v; break }
           }
-          if (-not $qtVer) { throw "No Qt version with MinGW found!" }
+          if (-not $qtVer) { throw "No Qt version with MSVC found!" }
           Write-Host "Installing Qt $qtVer ($qtArch)..."
           aqt install-qt windows desktop $qtVer $qtArch --outputdir C:\Qt
           "QT_VERSION=$qtVer" | Out-File $env:GITHUB_ENV -Append
@@ -80,62 +74,36 @@ jobs:
         run: cargo build --release
         working-directory: SearchEngine
 
-      - name: Locate MinGW tools
-        run: |
-          $msysRoot = if (Test-Path "C:\msys64") { "C:\msys64" } else { Get-ChildItem "C:\" -Directory | Where-Object Name -like "msys*" | Select-Object -First 1 -ExpandProperty FullName }
-          $mingwBin = if (Test-Path "$msysRoot\mingw64\bin\g++.exe") { "$msysRoot\mingw64\bin" } else { "$msysRoot\ucrt64\bin" }
-          Write-Host "MSYS2 root: $msysRoot"
-          Write-Host "MinGW bin:  $mingwBin"
-          "MINGW_BIN=$mingwBin" | Out-File $env:GITHUB_ENV -Append
-          Get-ChildItem "$mingwBin\g++*" -Name
-
       - name: Configure CMake
         run: |
           mkdir -p Anything/build
           cd Anything/build
-          cmake .. -G "MinGW Makefiles" `
+          cmake .. -G "Visual Studio 17 2022" -A x64 `
             -DCMAKE_PREFIX_PATH="C:/Qt/$env:QT_VERSION/$env:QT_ARCH" `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_MAKE_PROGRAM="$env:MINGW_BIN\mingw32-make.exe" `
-            -DCMAKE_C_COMPILER="$env:MINGW_BIN\gcc.exe" `
-            -DCMAKE_CXX_COMPILER="$env:MINGW_BIN\g++.exe"
+            -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Qt application
         run: |
-          & "$env:MINGW_BIN\mingw32-make.exe" -j${env:NUMBER_OF_PROCESSORS}
-        working-directory: Anything/build
+          cmake --build Anything/build --config Release -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Deploy Qt runtime DLLs
         run: |
           $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
           & "$qtDir\bin\windeployqt.exe" `
-            --no-compiler-runtime `
             --no-system-d3d-compiler `
-            Anything/build/AnythingUIQt.exe
-
-      - name: Copy MinGW runtime DLLs
-        run: |
-          $msysRoot = "C:\msys64"
-          $mingwBin = "$msysRoot\mingw64\bin"
-          $stage = "Anything\build"
-          $need = @("libgcc_s_seh-1.dll","libstdc++-6.dll","libwinpthread-1.dll")
-          foreach ($dll in $need) {
-            $src = Join-Path $mingwBin $dll
-            if (Test-Path $src) { Copy-Item $src $stage }
-            else { Write-Warning "Not found: $src" }
-          }
+            Anything/build/Release/AnythingUIQt.exe
 
       - name: Copy metadata
         run: |
-          Copy-Item Anything/LICENSE   Anything/build/
-          Copy-Item Anything/README.md Anything/build/
+          Copy-Item Anything/LICENSE   Anything/build/Release/
+          Copy-Item Anything/README.md Anything/build/Release/
 
       - name: Create release archive
         run: |
           $version = "${{ github.ref_name }}" -replace '^v', ''
           if (-not $version) { $version = "0.1.0" }
           $pkgName = "AnythingUIQt-${version}-win64"
-          Rename-Item Anything/build $pkgName
+          Rename-Item Anything/build/Release $pkgName
           Compress-Archive -Path "${pkgName}/*" -DestinationPath "${pkgName}.zip" -Force
 
       - name: Upload release artifact
