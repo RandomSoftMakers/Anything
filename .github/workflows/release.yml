@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  QT_VERSION: "6.11"
+  QT_VERSION: "6.8.3"
+  QT_ARCH: "win64_msvc2022_64"
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -49,21 +50,24 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          $versions = (aqt list-qt windows desktop) -split '\s+'
-          $best = $versions | Where-Object { $_ -match '^6\.' } | Sort-Object -Descending
-          $qtVer = $null; $qtArch = $null
-          foreach ($v in $best) {
-            $archs = aqt list-qt windows desktop --arch $v 2>&1
-            if ($LASTEXITCODE -ne 0) { continue }
-            $qtArch = ($archs -split '\s+' | Where-Object { $_ -match "msvc" } | Select-Object -First 1)
-            if ($qtArch) { $qtVer = $v; break }
+          Write-Host "Installing Qt $env:QT_VERSION ($env:QT_ARCH)..."
+          aqt install-qt windows desktop $env:QT_VERSION $env:QT_ARCH --outputdir C:\Qt
+
+      - name: Verify Qt installation
+        run: |
+          $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          Write-Host "Expected Qt dir: $qtDir"
+          if (Test-Path $qtDir) {
+            Write-Host "Qt found at: $qtDir"
+            Get-ChildItem "$qtDir\lib\cmake\Qt6" -Name | Select-Object -First 5
+          } else {
+            # Try to find what was actually installed
+            $installed = Get-ChildItem "C:\Qt" -Directory | Sort-Object Name -Descending
+            foreach ($d in $installed) {
+              Write-Host "Found: $($d.FullName)"
+            }
+            throw "Qt not found at expected path!"
           }
-          if (-not $qtVer) { throw "No Qt version with MSVC found!" }
-          Write-Host "Installing Qt $qtVer ($qtArch)..."
-          aqt install-qt windows desktop $qtVer $qtArch --outputdir C:\Qt
-          "QT_VERSION=$qtVer" | Out-File $env:GITHUB_ENV -Append
-          "QT_ARCH=$qtArch" | Out-File $env:GITHUB_ENV -Append
-          Write-Host "Qt installed at: C:\Qt\$qtVer\$qtArch"
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
