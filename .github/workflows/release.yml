@@ -11,6 +11,7 @@ on:
 env:
   QT_VERSION: "6.8.3"
   QT_ARCH: "win64_msvc2022_64"
+  QT_DIR: "C:\Qt\6.8.3"
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -50,24 +51,15 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          Write-Host "Installing Qt $env:QT_VERSION ($env:QT_ARCH)..."
           aqt install-qt windows desktop $env:QT_VERSION $env:QT_ARCH --outputdir C:\Qt
-
-      - name: Verify Qt installation
-        run: |
-          $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          Write-Host "Expected Qt dir: $qtDir"
-          if (Test-Path $qtDir) {
-            Write-Host "Qt found at: $qtDir"
-            Get-ChildItem "$qtDir\lib\cmake\Qt6" -Name | Select-Object -First 5
-          } else {
-            # Try to find what was actually installed
-            $installed = Get-ChildItem "C:\Qt" -Directory | Sort-Object Name -Descending
-            foreach ($d in $installed) {
-              Write-Host "Found: $($d.FullName)"
-            }
-            throw "Qt not found at expected path!"
+          # aqtinstall 3.x puts Qt at C:\Qt\<version>\ without arch subfolder
+          $qtDir = "C:\Qt\$env:QT_VERSION"
+          if (-not (Test-Path "$qtDir\lib\cmake\Qt6\Qt6Config.cmake")) {
+            # 2.x style: C:\Qt\<version>\<arch>\
+            $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
           }
+          Write-Host "Qt cmake path: $qtDir"
+          "QT_DIR=$qtDir" | Out-File $env:GITHUB_ENV -Append
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -83,7 +75,7 @@ jobs:
           mkdir -p Anything/build
           cd Anything/build
           cmake .. -G "Visual Studio 17 2022" -A x64 `
-            -DCMAKE_PREFIX_PATH="C:/Qt/$env:QT_VERSION/$env:QT_ARCH" `
+            -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Qt application
@@ -92,8 +84,7 @@ jobs:
 
       - name: Deploy Qt runtime DLLs
         run: |
-          $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          & "$qtDir\bin\windeployqt.exe" `
+          & "$env:QT_DIR\bin\windeployqt.exe" `
             --no-system-d3d-compiler `
             Anything/build/Release/AnythingUIQt.exe
 
