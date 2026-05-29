@@ -2,6 +2,7 @@ name: Build and Release
 
 on:
   push:
+    branches: ["rewrite"]
     tags:
       - "v*"
   pull_request:
