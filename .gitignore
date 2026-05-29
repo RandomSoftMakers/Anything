@@ -14,11 +14,15 @@ build/
 Thumbs.db
 .DS_Store
 
+# Release packaging
+_stage/
+AnythingUIQt-*.zip
+AnythingUIQt-*.tar.gz
+
 # Old C# artifacts (no longer used)
 *.dll
 *.pdb
 *.exe
-*.zip
 bin/
 obj/
 dist/
