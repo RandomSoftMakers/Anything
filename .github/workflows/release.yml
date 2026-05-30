@@ -110,8 +110,10 @@ jobs:
 
       - name: Create release archive
         run: |
-          $version = "${{ github.ref_name }}" -replace '^v', ''
-          if ($version -notmatch '^\d+(\.\d+){1,3}$') { $version = "0.1.0" }
+          $version = "0.1.0"
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref_name }}" -replace '^v', ''
+          }
           $pkgName = "AnythingUIQt-${version}-win64"
           Compress-Archive -Path "Anything/build/Release/*" -DestinationPath "${pkgName}.zip" -Force
 
@@ -126,8 +128,10 @@ jobs:
 
       - name: Build MSI installer
         run: |
-          $version = "${{ github.ref_name }}" -replace '^v', ''
-          if ($version -notmatch '^\d+(\.\d+){1,3}$') { $version = "0.1.0" }
+          $version = "0.1.0"
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref_name }}" -replace '^v', ''
+          }
           $buildDir = "$pwd\Anything\build\Release"
           $solutionDir = "$pwd\Anything"
           $wixBin = $env:WIX_BIN
@@ -221,13 +225,15 @@ jobs:
 
       - name: Package
         run: |
+          ver="0.1.0"
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            ver="${GITHUB_REF_NAME#v}"
+          fi
           cd Anything
           mkdir -p _stage
           cp "build/AnythingUIQt" "build/libsearchengine.so" _stage/
           cp LICENSE README.md _stage/
           cd _stage
-          ver="${GITHUB_REF_NAME#v}"
-          [ -z "$ver" ] && ver="0.1.0"
           tar czf "../../AnythingUIQt-${ver}-linux-x64.tar.gz" *
 
       - name: Upload release artifact
