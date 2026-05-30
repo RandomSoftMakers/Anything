@@ -52,15 +52,18 @@ jobs:
       - name: Install Qt via aqtinstall
         run: |
           pip install aqtinstall
-          aqt install-qt windows desktop $env:QT_VERSION $env:QT_ARCH --outputdir C:\Qt
-          # aqtinstall 3.x puts Qt at C:\Qt\<version>\ without arch subfolder
-          $qtDir = "C:\Qt\$env:QT_VERSION"
-          if (-not (Test-Path "$qtDir\lib\cmake\Qt6\Qt6Config.cmake")) {
-            # 2.x style: C:\Qt\<version>\<arch>\
-            $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          aqt install-qt --outputdir C:\Qt windows desktop $env:QT_VERSION $env:QT_ARCH
+          # Search for the actual Qt6 cmake config file
+          $qtConfig = Get-ChildItem -Path "C:\Qt" -Recurse -Filter "Qt6Config.cmake" -ErrorAction SilentlyContinue -Depth 5 | Select-Object -First 1
+          if ($qtConfig) {
+            $qtDir = $qtConfig.Directory.Parent.Parent.FullName
+            Write-Host "Found Qt at: $qtDir"
+            "QT_DIR=$qtDir" | Out-File $env:GITHUB_ENV -Append
+          } else {
+            Write-Host "Qt6 not found. Listing C:\Qt..."
+            Get-ChildItem -Path "C:\Qt" -Recurse -Depth 3 | Select-Object FullName
+            exit 1
           }
-          Write-Host "Qt cmake path: $qtDir"
-          "QT_DIR=$qtDir" | Out-File $env:GITHUB_ENV -Append
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -73,9 +76,15 @@ jobs:
 
       - name: Configure CMake
         run: |
-          $qtDir = "C:\Qt\$env:QT_VERSION"
+          $qtDir = $env:QT_DIR
           if (-not (Test-Path "$qtDir\lib\cmake\Qt6\Qt6Config.cmake")) {
-            $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
+            $qtConfig = Get-ChildItem -Path "C:\Qt" -Recurse -Filter "Qt6Config.cmake" -ErrorAction SilentlyContinue -Depth 5 | Select-Object -First 1
+            if ($qtConfig) {
+              $qtDir = $qtConfig.Directory.Parent.Parent.FullName
+            } else {
+              Write-Host "Qt6 not found!"
+              exit 1
+            }
           }
           Write-Host "Qt cmake path: $qtDir"
           mkdir -p Anything/build
