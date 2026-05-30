@@ -73,10 +73,15 @@ jobs:
 
       - name: Configure CMake
         run: |
+          $qtDir = "C:\Qt\$env:QT_VERSION"
+          if (-not (Test-Path "$qtDir\lib\cmake\Qt6\Qt6Config.cmake")) {
+            $qtDir = "C:\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          }
+          Write-Host "Qt cmake path: $qtDir"
           mkdir -p Anything/build
           cd Anything/build
           cmake .. -G "Visual Studio 17 2022" -A x64 `
-            -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
+            -DCMAKE_PREFIX_PATH="$qtDir" `
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Qt application
