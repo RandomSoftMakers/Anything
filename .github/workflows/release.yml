@@ -139,7 +139,7 @@ jobs:
             -srd `
             -gg `
             -sfrag `
-            -template:fragment `
+            -template fragment `
             -out harvested.wxs `
             -var var.BuildDir
 
@@ -150,7 +150,7 @@ jobs:
             -dSolutionDir="$solutionDir" `
             -arch x64 `
             -out "$pwd\" `
-            installer\Product.wxs harvested.wxs
+            "$solutionDir\installer\Product.wxs" harvested.wxs
 
           # Link .wixobj -> .msi
           & "$wixBin\light.exe" `
