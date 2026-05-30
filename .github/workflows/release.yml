@@ -111,7 +111,7 @@ jobs:
       - name: Create release archive
         run: |
           $version = "${{ github.ref_name }}" -replace '^v', ''
-          if (-not $version) { $version = "0.1.0" }
+          if ($version -notmatch '^\d+(\.\d+){1,3}$') { $version = "0.1.0" }
           $pkgName = "AnythingUIQt-${version}-win64"
           Compress-Archive -Path "Anything/build/Release/*" -DestinationPath "${pkgName}.zip" -Force
 
@@ -127,7 +127,7 @@ jobs:
       - name: Build MSI installer
         run: |
           $version = "${{ github.ref_name }}" -replace '^v', ''
-          if (-not $version) { $version = "0.1.0" }
+          if ($version -notmatch '^\d+(\.\d+){1,3}$') { $version = "0.1.0" }
           $buildDir = "$pwd\Anything\build\Release"
           $solutionDir = "$pwd\Anything"
           $wixBin = $env:WIX_BIN
