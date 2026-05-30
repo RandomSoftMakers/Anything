@@ -133,7 +133,7 @@ jobs:
             $version = "${{ github.ref_name }}" -replace '^v', ''
           }
           $buildDir = "$pwd\Anything\build\Release"
-          $solutionDir = "$pwd\Anything"
+          $solutionDir = "$pwd\Anything\"
           $wixBin = $env:WIX_BIN
 
           # Harvest all built files into a WiX fragment
