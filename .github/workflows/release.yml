@@ -117,9 +117,12 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          choco install wixtoolset -y --no-progress
-          $wixBin = "${env:ProgramFiles(x86)}\WiX Toolset v3\bin"
-          "WIX_BIN=$wixBin" | Out-File $env:GITHUB_ENV -Append
+          $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3141/wix314-binaries.zip"
+          $wixZip = "$env:TEMP\wix.zip"
+          $wixDir = "$env:TEMP\wix"
+          Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip
+          Expand-Archive -Path $wixZip -DestinationPath $wixDir -Force
+          "WIX_BIN=$wixDir" | Out-File $env:GITHUB_ENV -Append
 
       - name: Build MSI installer
         run: |
