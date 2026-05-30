@@ -113,8 +113,7 @@ jobs:
           $version = "${{ github.ref_name }}" -replace '^v', ''
           if (-not $version) { $version = "0.1.0" }
           $pkgName = "AnythingUIQt-${version}-win64"
-          Rename-Item Anything/build/Release $pkgName
-          Compress-Archive -Path "${pkgName}/*" -DestinationPath "${pkgName}.zip" -Force
+          Compress-Archive -Path "Anything/build/Release/*" -DestinationPath "${pkgName}.zip" -Force
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
