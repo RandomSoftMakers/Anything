@@ -117,7 +117,7 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3141/wix314-binaries.zip"
+          $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip"
           $wixZip = "$env:TEMP\wix.zip"
           $wixDir = "$env:TEMP\wix"
           Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip
