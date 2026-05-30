@@ -115,17 +115,62 @@ jobs:
           $pkgName = "AnythingUIQt-${version}-win64"
           Compress-Archive -Path "Anything/build/Release/*" -DestinationPath "${pkgName}.zip" -Force
 
+      - name: Install WiX Toolset
+        run: |
+          choco install wixtoolset -y --no-progress
+          $wixBin = "${env:ProgramFiles(x86)}\WiX Toolset v3\bin"
+          "WIX_BIN=$wixBin" | Out-File $env:GITHUB_ENV -Append
+
+      - name: Build MSI installer
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          if (-not $version) { $version = "0.1.0" }
+          $buildDir = "$pwd\Anything\build\Release"
+          $solutionDir = "$pwd\Anything"
+          $wixBin = $env:WIX_BIN
+
+          # Harvest all built files into a WiX fragment
+          & "$wixBin\heat.exe" dir "$buildDir" `
+            -cg HarvestedFiles `
+            -dr INSTALLDIR `
+            -srd `
+            -gg `
+            -sfrag `
+            -template:fragment `
+            -out harvested.wxs `
+            -var var.BuildDir
+
+          # Compile .wxs -> .wixobj
+          & "$wixBin\candle.exe" `
+            -dVersion="$version" `
+            -dBuildDir="$buildDir" `
+            -dSolutionDir="$solutionDir" `
+            -arch x64 `
+            -out "$pwd\" `
+            installer\Product.wxs harvested.wxs
+
+          # Link .wixobj -> .msi
+          & "$wixBin\light.exe" `
+            -out "$pwd\AnythingUIQt-${version}-win64.msi" `
+            -sacl `
+            -sw1076 `
+            "$pwd\Product.wixobj" "$pwd\harvested.wixobj"
+
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: AnythingUIQt-windows
-          path: AnythingUIQt-*.zip
+          path: |
+            AnythingUIQt-*.zip
+            AnythingUIQt-*.msi
 
       - name: Upload to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: AnythingUIQt-*.zip
+          files: |
+            AnythingUIQt-*.zip
+            AnythingUIQt-*.msi
           generate_release_notes: true
 
   build-linux:
