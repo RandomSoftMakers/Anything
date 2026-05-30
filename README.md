@@ -1,6 +1,6 @@
 # Anything
 
-Fast file search with Qt 6 and Rust backend.
+GUI for LibAnything with SearchEngine
 
 ## Features
 
