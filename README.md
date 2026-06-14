@@ -5,59 +5,53 @@ GUI for LibAnything with SearchEngine
 ## Features
 
 - **Search** — fuzzy and regex, debounced input (300ms)
-- **Everything-like syntax** — `!exclude`, `"exact phrase"`, `ext:pdf`, `path:C:\Docs`
-- **Dark / light theme** — toggle with `🌙`/`☀️` button
-- **Mica effect** (Windows 11) — translucent backdrop via `DwmSetWindowAttribute`
-- **About dialog** — version info + syntax reference
-- **Cross-platform** — compiles on Windows, Linux, macOS
+- **Everything-like syntax** — `!exclude`, `"exact phrase"`, `ext:pdf`, `path:`
+- **Dark / light theme** — toggle from header bar
+- **Settings** — background indexing toggle, rebuild index button
+- **Persistent YAML index** — instant startup after first scan
+- **Background auto-indexer** — indexes `/` on first run
 
 ## Architecture
 
 ```
-GUI (Qt 6)  →  QLibrary  →  searchengine.{dll,so,dylib}  →  libanything
+anything-gui (GTK4 + LibAdwaita)  ──→  searchengine (Rust)  ──→  libanything (Rust)
+      │                                      │
+      └── search queries                     │
+                                             ├── walks / recursively
+                                             └── writes ~/.config/anything-index.yaml
 ```
 
-The GUI loads the Rust library dynamically at runtime — no static linking required.
+LibAnything and SearchEngine compile into a single `.so`/`.dll` for dynamic loading.
 
 ## Build
 
 ### Prerequisites
 
-- Qt 6 (Core, Gui, Widgets)
-- CMake ≥ 3.22
-- C++17 compiler
 - Rust toolchain
+- GTK4 ≥ 4.22 and LibAdwaita ≥ 1.9 (dev packages)
 
-### Windows (MinGW)
-
-```bat
-cd SearchEngine && cargo build --release && cd ..
-cd Anything
-mkdir build && cd build
-cmake .. -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH=C:\Qt\6.4.2\mingw_64 -DCMAKE_BUILD_TYPE=Release
-mingw32-make -j4
-```
-
-### Linux
+### Native
 
 ```sh
-cd SearchEngine && cargo build --release && cd ..
 cd Anything
-mkdir build && cd build
-cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
-make -j$(nproc)
+cargo build --release
+./target/release/anything-gui
 ```
 
-### macOS
+### Flatpak
 
-Same as Linux. The Rust library becomes `libsearchengine.dylib`.
+```sh
+cd Anything
+flatpak run --command=bash org.flatpak.Builder
+flatpak-builder --user --install build ../flatpak/io.github.anything.yml
+flatpak run io.github.anything
+```
 
-## Files
+## Project layout
 
 | Path | Description |
 |------|-------------|
-| `src/main.cpp` | Entry point |
-| `src/MainWindow.h/.cpp` | Main window, Mica, themes, search, about |
-| `src/SearchEngineApi.h/.cpp` | QLibrary wrapper for searchengine FFI |
-| `src/FileResultModel.h/.cpp` | QAbstractListModel for search results |
-| `CMakeLists.txt` | CMake project file |
+| `Anything/` | GTK-rs GUI binary |
+| `SearchEngine/` | Search engine library (fuzzy, regex, filters) |
+| `LibAnything/` | Low-level filesystem indexer (walks `/`, writes YAML) |
+| `flatpak/` | Flatpak packaging files |

@@ -1,5 +1,6 @@
 # Build output
 build/
+target/
 
 # IDE
 .vs/
@@ -7,22 +8,11 @@ build/
 *.user
 *.suo
 
-# Qt
-*.pro.user
-
 # OS
 Thumbs.db
 .DS_Store
 
 # Release packaging
 _stage/
-AnythingUIQt-*.zip
-AnythingUIQt-*.tar.gz
-
-# Old C# artifacts (no longer used)
-*.dll
-*.pdb
-*.exe
-bin/
-obj/
-dist/
+anything-gui-*.zip
+anything-gui-*.tar.gz

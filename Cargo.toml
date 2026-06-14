@@ -1,0 +1,18 @@
+[package]
+name = "anything"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "anything-gui"
+path = "src/main.rs"
+
+[dependencies]
+gtk4 = { version = "0.11.3", features = ["v4_22"] }
+libadwaita = { version = "0.9.1", features = ["v1_9"] }
+searchengine = { path = "../SearchEngine" }
+libanything = { path = "../LibAnything" }
+log = "0.4.32"
+env_logger = "0.11.10"
+serde_yaml = "0.9.34"
+zbus = "5.16"

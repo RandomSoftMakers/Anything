@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Anything
+Comment=Fast file search tool
+Exec=anything-gui
+Icon=io.github.anything
+Terminal=false
+Categories=Utility;FileTools;
+StartupNotify=true
+Keywords=search;files;everything;indexer;
