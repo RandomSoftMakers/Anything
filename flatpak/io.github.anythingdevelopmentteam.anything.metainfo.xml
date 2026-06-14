@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.anything</id>
+  <id>io.github.AnythingDevelopmentTeam.anything</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <name>Anything</name>
-  <summary>Fast file search tool</summary>
+  <summary>File Search Tool</summary>
   <developer_name>Anything Development Team</developer_name>
   <description>
-    <p>Anything is a fast file search utility inspired by Everything by Voidtools.
+    <p>Anything is a fast file search utility inspired by Everything.
 It indexes your filesystem and provides instant fuzzy and regex search results
 as you type.</p>
     <p>Features:</p>
@@ -22,16 +22,16 @@ as you type.</p>
     <category>Utility</category>
   </categories>
   <url type="homepage">https://AnythingDevelopmentTeam.github.io</url>
-  <url type="bugtracker">https://AnythingDevelopmentTeam.github.io/issues</url>
-  <launchable type="desktop-id">io.github.anything.desktop</launchable>
+  <url type="bugtracker">https://github.com/AnythingDevelopmentTeam/Anything/issues</url>
+  <launchable type="desktop-id">io.github.AnythingDevelopmentTeam.anything.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <caption>Main window</caption>
-      <image>https://raw.githubusercontent.com/anomalyco/anything/main/screenshots/main.png</image>
+      <image>https://raw.githubusercontent.com/AnythingDevelopmentTeam/anything/rewrite/screenshots/main.jpg</image>
     </screenshot>
   </screenshots>
   <releases>
-    <release version="2.0" date="2025-01-01"/>
+    <release version="2.0" date="2026-06-15"/>
   </releases>
   <content_rating type="oars-1.1">
     <content_attribute id="violence-cartoon">none</content_attribute>

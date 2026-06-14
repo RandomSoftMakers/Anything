@@ -1,9 +1,9 @@
 name: Flatpak
 on:
   push:
-    branches: [main]
+    branches: [rewrite, main]
   pull_request:
-    branches: [main]
+    branches: [rewrite, main]
 
 jobs:
   flatpak:
@@ -29,20 +29,21 @@ jobs:
 
       - name: Build flatpak
         run: |
+          APP_ID=io.github.anythingdevelopmentteam.anything
           BUILD_DIR=_build
           REPO_DIR=_repo
-          flatpak build-init "$BUILD_DIR" io.github.anything \
+          flatpak build-init "$BUILD_DIR" "$APP_ID" \
             org.gnome.Sdk org.gnome.Platform 50
           install -Dm755 target/release/anything-gui \
             "$BUILD_DIR/files/bin/anything-gui"
-          install -Dm644 flatpak/io.github.anything.desktop \
-            "$BUILD_DIR/files/share/applications/io.github.anything.desktop"
-          install -Dm644 flatpak/io.github.anything.metainfo.xml \
-            "$BUILD_DIR/files/share/metainfo/io.github.anything.metainfo.xml"
+          install -Dm644 flatpak/$APP_ID.desktop \
+            "$BUILD_DIR/files/share/applications/$APP_ID.desktop"
+          install -Dm644 flatpak/$APP_ID.metainfo.xml \
+            "$BUILD_DIR/files/share/metainfo/$APP_ID.metainfo.xml"
           install -Dm644 icon.png \
-            "$BUILD_DIR/files/share/icons/hicolor/96x96/apps/io.github.anything.png"
+            "$BUILD_DIR/files/share/icons/hicolor/96x96/apps/$APP_ID.png"
           install -Dm644 icon.png \
-            "$BUILD_DIR/files/share/icons/hicolor/256x256/apps/io.github.anything.png"
+            "$BUILD_DIR/files/share/icons/hicolor/256x256/apps/$APP_ID.png"
           install -Dm644 LANG.ru.yaml \
             "$BUILD_DIR/files/share/anything/LANG.ru.yaml"
           install -Dm644 LANG.en.yaml \
@@ -55,12 +56,12 @@ jobs:
             --filesystem=host \
             --device=dri
           flatpak build-export "$REPO_DIR" "$BUILD_DIR"
-          flatpak build-bundle "$REPO_DIR" io.github.anything.flatpak \
-            io.github.anything \
+          flatpak build-bundle "$REPO_DIR" "$APP_ID.flatpak" \
+            "$APP_ID" \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: anything-flatpak
-          path: io.github.anything.flatpak
+          path: io.github.anythingdevelopmentteam.anything.flatpak

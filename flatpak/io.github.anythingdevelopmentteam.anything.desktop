@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Anything
-Comment=Fast file search tool
+Comment=File Search Tool
 Exec=anything-gui
-Icon=io.github.anything
+Icon=io.github.anythingdevelopmentteam.anything
 Terminal=false
 Categories=Utility;FileTools;
 StartupNotify=true

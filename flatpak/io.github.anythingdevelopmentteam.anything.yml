@@ -1,4 +1,4 @@
-app-id: io.github.anything
+app-id: io.github.anythingdevelopmentteam.anything
 runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
@@ -19,10 +19,10 @@ modules:
     build-commands:
       - cargo build --release --manifest-path Cargo.toml --bin anything-gui
       - install -Dm755 target/release/anything-gui /app/bin/anything-gui
-      - install -Dm644 flatpak/io.github.anything.desktop /app/share/applications/io.github.anything.desktop
-      - install -Dm644 flatpak/io.github.anything.metainfo.xml /app/share/metainfo/io.github.anything.metainfo.xml
-      - install -Dm644 icon.png /app/share/icons/hicolor/96x96/apps/io.github.anything.png
-      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/io.github.anything.png
+      - install -Dm644 flatpak/io.github.anythingdevelopmentteam.anything.desktop /app/share/applications/io.github.anythingdevelopmentteam.anything.desktop
+      - install -Dm644 flatpak/io.github.anythingdevelopmentteam.anything.metainfo.xml /app/share/metainfo/io.github.anythingdevelopmentteam.anything.metainfo.xml
+      - install -Dm644 icon.png /app/share/icons/hicolor/96x96/apps/io.github.anythingdevelopmentteam.anything.png
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/io.github.anythingdevelopmentteam.anything.png
       - install -Dm644 LANG.ru.yaml /app/share/anything/LANG.ru.yaml
       - install -Dm644 LANG.en.yaml /app/share/anything/LANG.en.yaml
     sources:
