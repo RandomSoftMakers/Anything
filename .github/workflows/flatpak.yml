@@ -21,11 +21,25 @@ jobs:
           flatpak install -y flathub \
             org.gnome.Sdk//50 org.gnome.Platform//50
 
-      - name: Checkout
+      - name: Checkout Anything
         uses: actions/checkout@v4
+        with:
+          path: Anything
+
+      - name: Checkout LibAnything
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/LibAnything
+          path: LibAnything
+
+      - name: Checkout SearchEngine
+        uses: actions/checkout@v4
+        with:
+          repository: AnythingDevelopmentTeam/SearchEngine
+          path: SearchEngine
 
       - name: Build release binary
-        run: cargo build --release --manifest-path Cargo.toml --bin anything-gui
+        run: cargo build --release --manifest-path Anything/Cargo.toml --bin anything-gui
 
       - name: Build flatpak
         run: |
@@ -34,19 +48,19 @@ jobs:
           REPO_DIR=_repo
           flatpak build-init "$BUILD_DIR" "$APP_ID" \
             org.gnome.Sdk org.gnome.Platform 50
-          install -Dm755 target/release/anything-gui \
+          install -Dm755 Anything/target/release/anything-gui \
             "$BUILD_DIR/files/bin/anything-gui"
-          install -Dm644 flatpak/$APP_ID.desktop \
+          install -Dm644 Anything/flatpak/$APP_ID.desktop \
             "$BUILD_DIR/files/share/applications/$APP_ID.desktop"
-          install -Dm644 flatpak/$APP_ID.metainfo.xml \
+          install -Dm644 Anything/flatpak/$APP_ID.metainfo.xml \
             "$BUILD_DIR/files/share/metainfo/$APP_ID.metainfo.xml"
-          install -Dm644 icon.png \
+          install -Dm644 Anything/icon.png \
             "$BUILD_DIR/files/share/icons/hicolor/96x96/apps/$APP_ID.png"
-          install -Dm644 icon.png \
+          install -Dm644 Anything/icon.png \
             "$BUILD_DIR/files/share/icons/hicolor/256x256/apps/$APP_ID.png"
-          install -Dm644 LANG.ru.yaml \
+          install -Dm644 Anything/LANG.ru.yaml \
             "$BUILD_DIR/files/share/anything/LANG.ru.yaml"
-          install -Dm644 LANG.en.yaml \
+          install -Dm644 Anything/LANG.en.yaml \
             "$BUILD_DIR/files/share/anything/LANG.en.yaml"
           flatpak build-finish "$BUILD_DIR" \
             --socket=wayland \
