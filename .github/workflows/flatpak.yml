@@ -15,7 +15,7 @@ jobs:
         run: |
           dnf install -y flatpak git \
             rust cargo gcc make \
-            libzstd-devel
+            libzstd-devel gtk4-devel libadwaita-devel
           flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
           flatpak install -y flathub \
