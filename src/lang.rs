@@ -66,7 +66,6 @@ pub fn available_codes() -> Vec<(String, String)> {
     let mut codes: Vec<(String, String)> = Vec::new();
     codes.push(("ru".to_string(), "Русский".to_string()));
 
-    // Scan config dir and flatpak dir for LANG.*.yaml files
     let dirs = vec![
         config_dir().ok(),
         Some(PathBuf::from("/app/share/anything")),
