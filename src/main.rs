@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{OnceLock, RwLock};
 #[cfg(not(windows))]
@@ -11,6 +11,63 @@ use libadwaita::prelude::*;
 
 use libanything::Indexer;
 use searchengine::{SearchEngine, SearchType};
+
+#[cfg(windows)]
+fn load_windows_theme() {
+    #[link(name = "dwmapi")]
+    extern "system" {
+        fn DwmGetColorizationColor(
+            pcrColorization: *mut u32,
+            pfOpaqueBlend: *mut i32,
+        ) -> i32;
+    }
+
+    let accent_color = unsafe {
+        let mut color: u32 = 0;
+        let mut opaque: i32 = 0;
+        if DwmGetColorizationColor(&mut color, &mut opaque) == 0 {
+            Some(color)
+        } else {
+            None
+        }
+    };
+
+    let accent_css = if let Some(color) = accent_color {
+        // DwmGetColorizationColor returns 0xAABBGGRR, convert to #RRGGBB
+        let r = color & 0xFF;
+        let g = (color >> 8) & 0xFF;
+        let b = (color >> 16) & 0xFF;
+        format!(
+            "@define-color accent #{:02x}{:02x}{:02x};\n\
+             @define-color accent_bg #{:02x}{:02x}{:02x};\n\
+             @define-color accent_fg #ffffff;\n\
+             @define-color accent_hover #{:02x}{:02x}{:02x};\n\
+             @define-color accent_active #{:02x}{:02x}{:02x};\n",
+            r, g, b,
+            r, g, b,
+            r.saturating_sub(20), g.saturating_sub(20), b.saturating_sub(20),
+            r.saturating_sub(40), g.saturating_sub(40), b.saturating_sub(40)
+        )
+    } else {
+        String::new()
+    };
+
+    // Load static theme file
+    let theme_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("styles").join("windows.css");
+    if theme_path.exists() {
+        let provider = gtk4::CssProvider::new();
+        if let Ok(css_data) = std::fs::read_to_string(&theme_path) {
+            let full_css = accent_css + &css_data;
+            let bytes = gtk4::glib::Bytes::from_owned(full_css.into_bytes());
+            provider.load_from_bytes(&bytes);
+            gtk4::style_context_add_provider_for_display(
+                &gtk4::gdk::Display::default().unwrap(),
+                &provider,
+                gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
+    }
+}
 
 mod indexing;
 mod lang;
@@ -139,6 +196,8 @@ impl AppState {
 }
 
 fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
+    #[cfg(windows)]
+    load_windows_theme();
     gtk4::Window::set_default_icon_name("io.github.anything");
     let _ = LANG.set(RwLock::new(lang::Lang::new()));
 
