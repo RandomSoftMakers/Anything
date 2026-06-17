@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::{mpsc, OnceLock, RwLock};
+use std::sync::{OnceLock, RwLock};
+#[cfg(not(windows))]
+use std::sync::mpsc;
 
 use gtk4::glib;
 use gtk4::prelude::*;
@@ -13,6 +15,7 @@ use searchengine::{SearchEngine, SearchType};
 mod indexing;
 mod lang;
 mod settings;
+#[cfg(not(windows))]
 mod tray;
 
 static LANG: OnceLock<RwLock<lang::Lang>> = OnceLock::new();
@@ -45,14 +48,28 @@ struct FileResult {
     full_path: String,
 }
 
+pub fn home_dir() -> PathBuf {
+    #[cfg(windows)]
+    {
+        std::env::var("USERPROFILE")
+            .or_else(|_| std::env::var("HOME"))
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("."))
+    }
+    #[cfg(not(windows))]
+    {
+        std::env::var("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("."))
+    }
+}
+
 fn default_index_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(home).join(".config/anything-index.anythingindex")
+    home_dir().join(".config/anything-index.anythingindex")
 }
 
 fn custom_skip_dirs_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(home).join(".config/anything/custom_skip_dirs.txt")
+    home_dir().join(".config/anything/custom_skip_dirs.txt")
 }
 
 fn load_custom_skip_dirs() -> Vec<String> {
@@ -474,9 +491,12 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
         *swin.borrow_mut() = Some(new_win);
     });
 
-    let (tray_tx, tray_rx) = mpsc::channel();
-    tray::setup_tray_polling(tray_rx, window.clone());
-    tray::start_tray_thread(tray_tx);
+    #[cfg(not(windows))]
+    {
+        let (tray_tx, tray_rx) = mpsc::channel();
+        tray::setup_tray_polling(tray_rx, window.clone());
+        tray::start_tray_thread(tray_tx);
+    }
 
     let quit_win = window.clone();
     window.connect_close_request(move |_| {

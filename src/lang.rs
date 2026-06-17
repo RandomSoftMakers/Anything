@@ -1,6 +1,22 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+fn home_dir() -> PathBuf {
+    #[cfg(windows)]
+    {
+        std::env::var("USERPROFILE")
+            .or_else(|_| std::env::var("HOME"))
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("."))
+    }
+    #[cfg(not(windows))]
+    {
+        std::env::var("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("."))
+    }
+}
+
 pub struct Lang {
     code: String,
     strings: HashMap<String, String>,
@@ -95,9 +111,22 @@ pub fn available_codes() -> Vec<(String, String)> {
 }
 
 fn detect_lang() -> Option<String> {
-    let lang = std::env::var("LANG").ok()?;
-    let code = lang.split('.').next()?.split('_').next()?;
-    Some(code.to_lowercase())
+    #[cfg(windows)]
+    {
+        // Try LANG first (may be set in some environments), fall back to locale
+        if let Ok(lang) = std::env::var("LANG") {
+            let code = lang.split('.').next()?.split('_').next()?;
+            return Some(code.to_lowercase());
+        }
+        // Use GetUserDefaultLocaleName via locale crate or fallback to "en"
+        Some("en".to_string())
+    }
+    #[cfg(not(windows))]
+    {
+        let lang = std::env::var("LANG").ok()?;
+        let code = lang.split('.').next()?.split('_').next()?;
+        Some(code.to_lowercase())
+    }
 }
 
 fn load_yaml(code: &str) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
@@ -116,8 +145,7 @@ fn load_yaml(code: &str) -> Result<HashMap<String, String>, Box<dyn std::error::
 }
 
 fn config_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
-    let home = std::env::var("HOME")?;
-    let dir = PathBuf::from(home).join(".config/anything");
+    let dir = home_dir().join(".config/anything");
     if !dir.exists() {
         std::fs::create_dir_all(&dir)?;
     }

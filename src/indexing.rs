@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 use gtk4::glib;
@@ -8,7 +7,7 @@ use gtk4::prelude::*;
 use libanything::Indexer;
 use searchengine::SearchEngine;
 
-use crate::{default_index_path, load_custom_skip_dirs, tr, tr_fmt, UiWidgets};
+use crate::{default_index_path, home_dir, load_custom_skip_dirs, tr, tr_fmt, UiWidgets};
 
 pub fn start_indexing(
     indexer: &Rc<RefCell<Option<Indexer>>>,
@@ -18,10 +17,7 @@ pub fn start_indexing(
     let index_path = default_index_path();
     let mut idx = Indexer::new(index_path.clone());
 
-    let ignore_path = PathBuf::from(
-        std::env::var("HOME").unwrap_or_else(|_| ".".to_string()),
-    )
-    .join(".config/anything/IgnoreConfig.yaml");
+    let ignore_path = home_dir().join(".config/anything/IgnoreConfig.yaml");
     let mut ignore_cfg = match SearchEngine::load_ignore_config_yaml(&ignore_path) {
         Ok(cfg) => cfg,
         Err(_) => SearchEngine::default_ignore_config(),

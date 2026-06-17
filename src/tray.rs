@@ -1,3 +1,4 @@
+#![cfg(not(windows))]
 use std::sync::mpsc;
 
 use gtk4::glib;
