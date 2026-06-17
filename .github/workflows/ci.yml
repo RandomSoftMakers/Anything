@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [rewrite, main]
+  pull_request:
+    branches: [rewrite, main]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk4
+            mingw-w64-x86_64-libadwaita
+            mingw-w64-x86_64-zstd
+
+      - name: Build
+        run: cargo build --target x86_64-pc-windows-gnu --release
+        env:
+          PKG_CONFIG_ALLOW_CROSS: "1"
+          PKG_CONFIG_PATH: "C:/msys64/mingw64/lib/pkgconfig"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anything-windows
+          path: target/x86_64-pc-windows-gnu/release/anything-gui.exe
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libzstd-dev
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anything-linux
+          path: target/release/anything-gui

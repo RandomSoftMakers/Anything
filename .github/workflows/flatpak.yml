@@ -26,18 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: Anything
-
-      - name: Checkout LibAnything
-        uses: actions/checkout@v4
-        with:
-          repository: AnythingDevelopmentTeam/LibAnything
-          path: LibAnything
-
-      - name: Checkout SearchEngine
-        uses: actions/checkout@v4
-        with:
-          repository: AnythingDevelopmentTeam/SearchEngine
-          path: SearchEngine
+          submodules: recursive
 
       - name: Build release binary
         run: cargo build --release --manifest-path Anything/Cargo.toml --bin anything-gui
