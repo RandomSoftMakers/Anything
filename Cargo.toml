@@ -11,7 +11,7 @@ path = "src/main.rs"
 gtk4 = { version = "0.11.3", features = ["v4_22"] }
 libadwaita = { version = "0.9.1", features = ["v1_9"] }
 searchengine = { path = "lib/SearchEngine" }
-libanything = { path = "lib/LibAnything" }
+libanything = { path = "lib/SearchEngine/lib/LibAnything" }
 log = "0.4.32"
 env_logger = "0.11.10"
 serde_yaml = "0.9.34"
