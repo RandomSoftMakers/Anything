@@ -9,9 +9,6 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,6 +30,7 @@ jobs:
         env:
           PKG_CONFIG_ALLOW_CROSS: "1"
           PKG_CONFIG_PATH: "C:/msys64/mingw64/lib/pkgconfig"
+          PATH: "C:\msys64\mingw64\bin;${{ env.PATH }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
