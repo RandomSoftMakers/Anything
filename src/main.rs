@@ -129,6 +129,25 @@ fn custom_skip_dirs_path() -> PathBuf {
     home_dir().join(".config/anything/custom_skip_dirs.txt")
 }
 
+fn theme_setting_path() -> PathBuf {
+    home_dir().join(".config/anything/theme")
+}
+
+fn load_theme_setting() -> Option<bool> {
+    std::fs::read_to_string(theme_setting_path())
+        .ok()
+        .and_then(|s| match s.trim() {
+            "dark" => Some(true),
+            "light" => Some(false),
+            _ => None,
+        })
+}
+
+fn save_theme_setting(dark: bool) {
+    let content = if dark { "dark" } else { "light" };
+    let _ = std::fs::write(theme_setting_path(), content);
+}
+
 fn load_custom_skip_dirs() -> Vec<String> {
     let path = custom_skip_dirs_path();
     match std::fs::read_to_string(&path) {
@@ -222,9 +241,19 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
     settings_btn.set_icon_name("open-menu-symbolic");
 
     let style_manager = libadwaita::StyleManager::default();
+    let saved_dark = load_theme_setting();
+    if let Some(dark) = saved_dark {
+        style_manager.set_color_scheme(if dark {
+            libadwaita::ColorScheme::ForceDark
+        } else {
+            libadwaita::ColorScheme::ForceLight
+        });
+    }
     let is_dark = Rc::new(RefCell::new(
-        style_manager.color_scheme() == libadwaita::ColorScheme::ForceDark
-            || style_manager.is_dark(),
+        saved_dark.unwrap_or_else(|| {
+            style_manager.color_scheme() == libadwaita::ColorScheme::ForceDark
+                || style_manager.is_dark()
+        })
     ));
 
     let theme_btn = gtk4::Button::new();
@@ -251,6 +280,7 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
                 btn.set_tooltip_text(Some(&tr("light_theme")));
             }
             *is_dark.borrow_mut() = !dark;
+            save_theme_setting(!dark);
         }
     });
 
