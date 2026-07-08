@@ -183,5 +183,7 @@ fn default_ru() -> HashMap<String, String> {
     m.insert("general".into(), "Основные".into());
     m.insert("excluded_dirs".into(), "Исключённые каталоги".into());
     m.insert("dir_placeholder".into(), "/путь/к/каталогу".into());
+    m.insert("mode_exact".into(), "Точный поиск".into());
+    m.insert("mode_fuzzy".into(), "Нечёткий поиск".into());
     m
 }

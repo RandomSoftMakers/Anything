@@ -105,6 +105,32 @@ struct FileResult {
     full_path: String,
 }
 
+fn icon_for_file(path: &str) -> &'static str {
+    let p = std::path::Path::new(path);
+    if p.is_dir() {
+        return "folder-symbolic";
+    }
+    let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    if name.starts_with('.') && !name.eq_ignore_ascii_case(".ds_store") {
+        return "text-x-generic";
+    }
+    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    match ext.as_str() {
+        "png" | "jpg" | "jpeg" | "gif" | "bmp" | "svg" | "webp" | "ico" => "image-x-generic",
+        "mp4" | "avi" | "mkv" | "mov" | "wmv" | "flv" | "webm" => "video-x-generic",
+        "mp3" | "wav" | "flac" | "ogg" | "wma" | "aac" => "audio-x-generic",
+        "zip" | "tar" | "gz" | "bz2" | "xz" | "7z" | "rar" | "zst" => "package-x-generic",
+        "pdf" | "djvu" => "x-office-document",
+        "doc" | "docx" | "odt" | "rtf" | "tex" => "x-office-document",
+        "xls" | "xlsx" | "ods" | "csv" => "x-office-spreadsheet",
+        "ppt" | "pptx" | "odp" => "x-office-presentation",
+        "rs" | "py" | "js" | "ts" | "c" | "cpp" | "h" | "java" | "go" | "rb" | "sh" | "toml" | "json" | "yaml" | "yml" | "xml" | "html" | "css" => "text-x-code",
+        "exe" | "msi" | "appimage" | "deb" | "rpm" | "bin" => "application-x-executable",
+        "iso" | "img" => "media-optical",
+        _ => "text-x-generic",
+    }
+}
+
 pub fn home_dir() -> PathBuf {
     #[cfg(windows)]
     {
@@ -174,6 +200,8 @@ struct RefreshableLabels {
     window: libadwaita::ApplicationWindow,
     search_entry: gtk4::SearchEntry,
     theme_btn: gtk4::Button,
+    mode_btn: gtk4::ToggleButton,
+    search_type: Rc<RefCell<SearchType>>,
     is_dark: Rc<RefCell<bool>>,
 }
 
@@ -187,6 +215,11 @@ impl RefreshableLabels {
         } else {
             self.theme_btn.set_tooltip_text(Some(&tr("dark_theme")));
         }
+        if *self.search_type.borrow() == SearchType::Exact {
+            self.mode_btn.set_tooltip_text(Some(&tr("mode_exact")));
+        } else {
+            self.mode_btn.set_tooltip_text(Some(&tr("mode_fuzzy")));
+        }
     }
 }
 
@@ -195,7 +228,8 @@ struct UiWidgets {
     window: libadwaita::ApplicationWindow,
     string_list: gtk4::StringList,
     status_label: gtk4::Label,
-    spinner: gtk4::Box,
+    spinner: gtk4::Spinner,
+    search_type: Rc<RefCell<SearchType>>,
 }
 
 struct AppState {
@@ -284,12 +318,35 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
         }
     });
 
+    let search_type = Rc::new(RefCell::new(SearchType::Exact));
+
+    let mode_btn = gtk4::ToggleButton::new();
+    mode_btn.set_icon_name("edit-find-symbolic");
+    mode_btn.set_tooltip_text(Some(&tr("mode_exact")));
+    mode_btn.add_css_class("flat");
+
+    {
+        let search_type = search_type.clone();
+        let mode_btn = mode_btn.clone();
+        mode_btn.connect_toggled(move |btn| {
+            let is_exact = *search_type.borrow() == SearchType::Exact;
+            if is_exact {
+                *search_type.borrow_mut() = SearchType::Fuzzy;
+                btn.set_tooltip_text(Some(&tr("mode_fuzzy")));
+            } else {
+                *search_type.borrow_mut() = SearchType::Exact;
+                btn.set_tooltip_text(Some(&tr("mode_exact")));
+            }
+        });
+    }
+
     let about_btn = gtk4::Button::new();
     about_btn.set_icon_name("help-about-symbolic");
     about_btn.set_tooltip_text(Some(&tr("about")));
 
     header_bar.pack_start(&settings_btn);
     header_bar.pack_end(&theme_btn);
+    header_bar.pack_end(&mode_btn);
     header_bar.pack_end(&about_btn);
     toolbar_view.add_top_bar(&header_bar);
 
@@ -305,70 +362,11 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
     search_entry.set_search_delay(300);
     content.append(&search_entry);
 
-    let spinner = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    let spinner = gtk4::Spinner::new();
     spinner.set_halign(gtk4::Align::Center);
     spinner.set_valign(gtk4::Align::Center);
+    spinner.set_size_request(32, 32);
     spinner.set_visible(false);
-
-    let overlay = gtk4::Overlay::new();
-    overlay.set_width_request(64);
-    overlay.set_height_request(64);
-
-    let folder_image = gtk4::Image::from_icon_name("folder-symbolic");
-    folder_image.set_pixel_size(64);
-    overlay.set_child(Some(&folder_image));
-
-    let scan_area = gtk4::DrawingArea::new();
-    scan_area.set_halign(gtk4::Align::Fill);
-    scan_area.set_valign(gtk4::Align::Fill);
-
-    let angle = Rc::new(RefCell::new(0.0_f64));
-    {
-        let angle = angle.clone();
-        scan_area.set_draw_func(move |_, cr, w, h| {
-            let a = *angle.borrow();
-            let cx = w as f64 / 2.0;
-            let cy = h as f64 / 2.0;
-            let hw = w as f64 * 0.38;
-            let hh = h as f64 * 0.35;
-
-            let mx = cx + hw * (3.0 * a).sin();
-            let my = cy + hh * (2.0 * a).sin();
-
-            let _ = cr.save();
-            cr.arc(mx, my, 6.0, 0.0, 2.0 * std::f64::consts::PI);
-            cr.set_source_rgba(0.3, 0.7, 1.0, 0.85);
-            cr.set_line_width(1.8);
-            let _ = cr.stroke();
-            let dx = (3.0 * a).cos();
-            let dy = (2.0 * a).cos();
-            let len = (dx * dx + dy * dy).sqrt();
-            if len > 0.0 {
-                let nx = dx / len;
-                let ny = dy / len;
-                cr.move_to(mx + 3.5 * nx, my + 3.5 * ny);
-                cr.line_to(mx + 12.0 * nx, my + 12.0 * ny);
-                cr.set_source_rgba(0.3, 0.7, 1.0, 0.85);
-                cr.set_line_width(2.2);
-                let _ = cr.stroke();
-            }
-            let _ = cr.restore();
-        });
-    }
-
-    overlay.add_overlay(&scan_area);
-    spinner.append(&overlay);
-
-    {
-        let angle = angle.clone();
-        let scan_area = scan_area.clone();
-        glib::timeout_add_local(std::time::Duration::from_millis(33), move || {
-            *angle.borrow_mut() += 0.07;
-            scan_area.queue_draw();
-            glib::ControlFlow::Continue
-        });
-    }
-
     content.append(&spinner);
 
     let scrolled = gtk4::ScrolledWindow::new();
@@ -381,12 +379,37 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
 
     factory.connect_setup(|_, obj| {
         let list_item = obj.downcast_ref::<gtk4::ListItem>().unwrap();
-        let label = gtk4::Label::new(None);
-        label.set_halign(gtk4::Align::Start);
-        label.set_valign(gtk4::Align::Center);
-        label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-        label.set_max_width_chars(80);
-        list_item.set_child(Some(&label));
+
+        let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+        row.set_margin_top(6);
+        row.set_margin_bottom(6);
+        row.set_margin_start(8);
+        row.set_margin_end(8);
+
+        let icon = gtk4::Image::new();
+        icon.set_pixel_size(28);
+        icon.set_valign(gtk4::Align::Center);
+
+        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 1);
+        let name_label = gtk4::Label::new(None);
+        name_label.set_halign(gtk4::Align::Start);
+        name_label.set_xalign(0.0);
+        name_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        name_label.add_css_class("body");
+
+        let path_label = gtk4::Label::new(None);
+        path_label.set_halign(gtk4::Align::Start);
+        path_label.set_xalign(0.0);
+        path_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        path_label.add_css_class("caption");
+
+        text_box.append(&name_label);
+        text_box.append(&path_label);
+
+        row.append(&icon);
+        row.append(&text_box);
+
+        list_item.set_child(Some(&row));
     });
 
     factory.connect_bind({
@@ -394,20 +417,23 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
         move |_, obj| {
             let list_item = obj.downcast_ref::<gtk4::ListItem>().unwrap();
             let pos = list_item.position();
-            let label = list_item
+            let row = list_item
                 .child()
-                .and_downcast::<gtk4::Label>()
-                .expect("expected label");
+                .and_downcast::<gtk4::Box>()
+                .expect("expected box");
             let guard = results.borrow();
             if let Some(r) = guard.get(pos as usize) {
-                let name_escaped = glib::markup_escape_text(&r.name);
-                let path_escaped = glib::markup_escape_text(&r.full_path);
-                label.set_markup(&format!(
-                    "<b>{}</b>\n<span size='small' alpha='50%'>{}</span>",
-                    name_escaped, path_escaped
-                ));
-            } else {
-                label.set_markup("");
+                if let Some(icon) = row.first_child().and_downcast::<gtk4::Image>() {
+                    icon.set_icon_name(Some(icon_for_file(&r.full_path)));
+                }
+                if let Some(text_box) = row.last_child().and_downcast::<gtk4::Box>() {
+                    if let Some(name_lbl) = text_box.first_child().and_downcast::<gtk4::Label>() {
+                        name_lbl.set_text(&r.name);
+                    }
+                    if let Some(path_lbl) = text_box.last_child().and_downcast::<gtk4::Label>() {
+                        path_lbl.set_text(&r.full_path);
+                    }
+                }
             }
         }
     });
@@ -427,12 +453,15 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
         string_list: string_list.clone(),
         status_label: status_label.clone(),
         spinner: spinner.clone(),
+        search_type: search_type.clone(),
     };
 
     let refreshable = RefreshableLabels {
         window: window.clone(),
         search_entry: search_entry.clone(),
         theme_btn: theme_btn.clone(),
+        mode_btn: mode_btn.clone(),
+        search_type: search_type.clone(),
         is_dark: is_dark.clone(),
     };
 
@@ -490,9 +519,10 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
                 return;
             }
 
+            let st = *ui.search_type.borrow();
             let guard = engine.borrow();
             let file_results: Vec<FileResult> = match guard.as_ref() {
-                Some(engine) => engine.search(&query, SearchType::Fuzzy)
+                Some(engine) => engine.search(&query, st)
                     .iter()
                     .map(|r| FileResult {
                         name: std::path::Path::new(&r.name)
@@ -522,25 +552,22 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
 
     list_view.connect_activate({
         let results = state.results.clone();
-        let ui = ui.clone();
         move |_, position| {
             let full = results
                 .borrow()
                 .get(position as usize)
                 .map(|r| r.full_path.clone());
             if let Some(ref path) = full {
-                if let Some(parent) = std::path::Path::new(path).parent() {
-                    let uri = format!("file://{}", parent.display());
-                    let _ = gtk4::UriLauncher::new(&uri).launch(
-                        Some(&ui.window),
-                        None::<&gtk4::gio::Cancellable>,
-                        |result| {
-                            if let Err(e) = result {
-                                log::warn!("Failed to open directory: {}", e);
-                            }
-                        },
-                    );
-                }
+                let uri = format!("file://{}", path);
+                let _ = gtk4::UriLauncher::new(&uri).launch(
+                    None::<&gtk4::Window>,
+                    None::<&gtk4::gio::Cancellable>,
+                    |result| {
+                        if let Err(e) = result {
+                            log::warn!("Failed to open file: {}", e);
+                        }
+                    },
+                );
             }
         }
     });
@@ -586,6 +613,14 @@ fn build_ui(app: &libadwaita::Application) -> libadwaita::ApplicationWindow {
         tray::setup_tray_polling(tray_rx, window.clone());
         tray::start_tray_thread(tray_tx);
     }
+
+    window.set_size_request(400, 300);
+
+    let entry = search_entry.clone();
+    glib::idle_add_local(move || {
+        entry.grab_focus();
+        glib::ControlFlow::Break
+    });
 
     let quit_win = window.clone();
     window.connect_close_request(move |_| {
